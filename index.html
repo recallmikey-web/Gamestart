@@ -124,7 +124,8 @@
         
         /* 新增：剧集描述折叠样式 */
         .description-collapsed {
-            max-height: 4.875em; /* 约 3 行文本的高度 (line-height: relaxed ≈ 1.625 * 3) */
+            /* 约 3 行文本的高度 (line-height: relaxed ≈ 1.625 * 3) */
+            max-height: 4.875em; 
             overflow: hidden;
             transition: max-height 0.5s ease-in-out;
             position: relative;
@@ -137,11 +138,10 @@
             left: 0;
             right: 0;
             height: 1.5em; 
+            /* 遮罩颜色与卡片背景色 (白色) 一致 */
             background: linear-gradient(to top, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
         }
-        .description-expanded::after {
-            content: none; /* 展开时移除遮罩 */
-        }
+        /* 展开时不需要移除遮罩，因为展开时会移除 .description-collapsed 类，自动移除 ::after */
 
     </style>
 </head>
@@ -215,8 +215,6 @@
         // -----------------------------------------------------------
         // !!! 解决中国访问问题的核心：静态 XML 缓存 !!!
         // -----------------------------------------------------------
-        // 已使用您提供的准确 XML 内容替换了此变量，以确保解析成功。
-        // 
         // 优点：100% 避免 CORS 和 GFW 屏蔽。 
         // 缺点：内容需要您手动更新。
         // -----------------------------------------------------------
@@ -1271,27 +1269,57 @@
             setTimeout(() => elements.audioPlayer.play(), 100); 
         }
 
-        // --- 描述展开/折叠功能 (新增) ---
+        // --- 描述展开/折叠功能 (已修复) ---
         function toggleDescription(descId, buttonId) {
             const desc = document.getElementById(descId);
             const button = document.getElementById(buttonId);
             
+            // CSS transition duration is 0.5s
+            const transitionDuration = 500; 
+            // Target collapsed height defined in CSS is 4.875em
+            const collapsedHeight = '4.875em';
+            
             if (desc.classList.contains('description-collapsed')) {
-                // 展开: 移除折叠类，并设置 max-height 为实际内容高度
-                desc.style.maxHeight = desc.scrollHeight + "px";
+                // 状态: EXPAND (从折叠到展开)
+                
+                // 1. 移除折叠类和目标高度
                 desc.classList.remove('description-collapsed');
-                desc.classList.add('description-expanded');
+                desc.classList.add('description-expanded'); // 标记为已展开
+                
+                // 2. 设置 max-height 为实际内容高度，触发平滑展开
+                // 注意：scrollHeight 必须在移除 .description-collapsed 之后获取，但我们这里先移除类，CSS max-height: 4.875em 失效，
+                // 然后设置 scrollHeight，让 transition 从 4.875em 移动到 scrollHeight
+                desc.style.maxHeight = desc.scrollHeight + "px";
+                
+                // 3. 动画完成后清除 inline max-height，允许内容动态重排
+                setTimeout(() => {
+                    // 确保在清除前，用户没有再次点击收起
+                    if (desc.classList.contains('description-expanded')) {
+                         desc.style.maxHeight = '';
+                    }
+                }, transitionDuration + 50); // 略大于过渡时间
+
                 button.textContent = '收起内容 (折叠)';
+
             } else {
-                // 折叠: 先设置一个固定的高度，然后添加折叠类，让 CSS transition 生效
+                // 状态: COLLAPSE (从展开到折叠)
+
+                // 1. 确保当前 max-height 是完整的 scrollHeight，为收缩动画提供起始点
+                // 这一步在展开后可能已经被清除了 (maxHeight = ''), 所以需要重新设置
                 desc.style.maxHeight = desc.scrollHeight + "px"; 
+                
+                // 2. 强制浏览器重绘 (reflow) 以确保步骤 1 生效
+                desc.offsetHeight; 
+
+                // 3. 立即将 max-height 设置为折叠目标高度，触发收缩过渡
+                desc.style.maxHeight = collapsedHeight; 
                 desc.classList.add('description-collapsed');
                 desc.classList.remove('description-expanded');
-                // 确保在下一个渲染周期恢复到 CSS 定义的 max-height (4.875em)
-                // 浏览器会自动处理这里的 CSS 属性变化，触发平滑过渡
+
                 button.textContent = '显示全部 (展开)';
             }
         }
+        
         // --- 辅助函数 (保持不变) ---
         function formatDate(dateString) {
             try {
@@ -1326,14 +1354,17 @@
             // 检查内容是否足够长，需要折叠（以 150 字符为界限）
             const needsToggle = fullDescription.length > 150;
 
+            // 初始状态：如果需要折叠，则应用 description-collapsed 类
+            const initialClass = needsToggle ? 'description-collapsed' : 'description-expanded';
+
             card.innerHTML = `
                 <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between space-y-4 lg:space-y-0">
                     <div class="flex-1 min-w-0 pr-4">
                         <h3 class="text-xl font-bold text-black border-b-2 border-dotted border-gray-400 mb-1">${index + 1}. ${episode.title}</h3>
                         <p class="text-sm text-red-700 font-bold mb-3">日期: ${episode.pubDate}</p>
                         
-                        <!-- 描述容器，如果需要折叠则加上 collapsed 类 -->
-                        <div id="desc-${index}" class="text-gray-700 text-sm leading-relaxed ${needsToggle ? 'description-collapsed' : ''} ${needsToggle ? '' : 'description-expanded'}">
+                        <!-- 描述容器 -->
+                        <div id="desc-${index}" class="text-gray-700 text-sm leading-relaxed ${initialClass}">
                             ${fullDescription || '数据载入中...'}
                         </div>
                         
@@ -1359,7 +1390,7 @@
             elements.episodesContainer.appendChild(card);
         }
 
-        // --- 主逻辑 (已修改为优先处理硬编码 XML) ---
+        // --- 主逻辑 (已修复：移除倒序排列) ---
         async function loadPodcastFeed() {
             elements.loadingSpinner.classList.remove('hidden');
             elements.errorMessage.classList.add('hidden');
@@ -1443,8 +1474,9 @@
                 if (episodes.length === 0) {
                     elements.episodesContainer.innerHTML = '<p class="text-black text-center py-8 font-bold border-4 border-black bg-white">!! 任务列表为空 (E-00) !!</p>';
                 } else {
-                    // 倒序渲染，确保最新的剧集在最上方
-                    episodes.reverse().forEach((ep, index) => renderEpisode(ep, index));
+                    // ** FIX: 移除 episodes.reverse() **
+                    // 按照 XML 顺序渲染，通常是按发布时间倒序排列 (最新的在最前，符合用户默认认知)
+                    episodes.forEach((ep, index) => renderEpisode(ep, index));
                 }
                 
                 elements.loadingSpinner.classList.add('hidden');
