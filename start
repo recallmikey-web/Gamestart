@@ -6,11 +6,15 @@
     <title>游戏开始 - 播客官网</title>
     <!-- 引入 Tailwind CSS CDN --><script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* 采用通用且粗犷的字体，并通过CSS模拟像素效果 */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@800&display=swap');
+        /*
+        【中国访问优化 - 最终方案】
+        1. 移除所有外部代理。
+        2. 使用 HARDCODED_XML 变量缓存 RSS 内容，实现离线/静态展示，彻底解决中国大陆的网络屏蔽和 CORS 跨域问题。
+        */
         
         body {
-            font-family: 'Inter', sans-serif;
+            /* 采用更通用的系统字体栈，兼容中文字体，确保快速加载 */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
             /* 亮黄色背景 */
             background-color: #FEE000;
             color: #000000; /* 纯黑色文本 */
@@ -117,13 +121,34 @@
             opacity: 0.08; /* 非常低的透明度，提供微妙的纹理 */
             mix-blend-mode: multiply; 
         }
+        
+        /* 新增：剧集描述折叠样式 */
+        .description-collapsed {
+            /* 约 3 行文本的高度 (line-height: relaxed ≈ 1.625 * 3) */
+            max-height: 4.875em; 
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+            position: relative;
+        }
+        .description-collapsed::after {
+            /* 渐变遮罩，提示内容被截断 */
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1.5em; 
+            /* 遮罩颜色与卡片背景色 (白色) 一致 */
+            background: linear-gradient(to top, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
+        }
+        /* 展开时不需要移除遮罩，因为展开时会移除 .description-collapsed 类，自动移除 ::after */
 
     </style>
 </head>
 <body>
 
     <div id="app" class="min-h-screen flex flex-col items-center p-4">
-        <!-- 主容器 --><!-- Header 添加了 pixel-art-background 类 --><header class="w-full bg-white shadow-xl p-6 lg:p-10 mb-8 rounded-none border-4 border-black pixel-art-background">
+        <!-- 主容器 --><header class="w-full bg-white shadow-xl p-6 lg:p-10 mb-8 rounded-none border-4 border-black pixel-art-background">
             <!-- 内容恢复为图标和文字居中排列 --><div class="max-w-4xl mx-auto flex flex-col lg:flex-row items-center justify-center space-y-4 lg:space-y-0">
                 <div class="flex flex-col items-center justify-center space-y-4">
                     <!-- 播客图标 - w-32 h-32 固定大小 --><div class="w-32 h-32 bg-gray-900 flex items-center justify-center shadow-lg border-4 border-black overflow-hidden relative z-10">
@@ -184,9 +209,1033 @@
     </div>
 
     <script>
+        // 您的 RSS Feed URL，仅用于提示。
         const RSS_FEED_URL = 'https://feed.xyzfm.space/n9bfbdmbbqam';
-        const CORS_PROXY = 'https://corsproxy.io/?'; 
         
+        // -----------------------------------------------------------
+        // !!! 解决中国访问问题的核心：静态 XML 缓存 !!!
+        // -----------------------------------------------------------
+        // 优点：100% 避免 CORS 和 GFW 屏蔽。 
+        // 缺点：内容需要您手动更新。
+        // -----------------------------------------------------------
+        const HARDCODED_XML = `
+<rss xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0">
+<channel>
+<title>游戏开始丨GAME START</title>
+<description>非专业人员不正规团体与你分享三流游戏生活。 进听友群+v Recallmikey</description>
+<itunes:image href="https://image.xyzcdn.net/Fgsz78ncyuMncuAXKjAvOL-IW9wv.png"/>
+<itunes:category text="Leisure"/>
+<language>zh-cn</language>
+<itunes:explicit>true</itunes:explicit>
+<atom:link href="https://feed.xyzfm.space/n9bfbdmbbqam" type="application/rss+xml" rel="self"/>
+<link>https://www.xiaoyuzhoufm.com/podcast/62de92508c5971a066098311?utm_source=rss</link>
+<copyright>陈宜文@小宇宙App</copyright>
+<itunes:author>陈宜文</itunes:author>
+<itunes:owner>
+<itunes:name>陈宜文</itunes:name>
+<itunes:email>306999336@qq.com</itunes:email>
+</itunes:owner>
+<itunes:type>episodic</itunes:type>
+<item>
+<title>Vol.067 陪媳妇生娃能打游戏吗？</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/691d7e246018cc2c9896991a/media.xyzcdn.net/62de92508c5971a066098311/llsOKL3TrMe3xMjzaOaA8diLNUJi.m4a" type="audio/mp4" length="223174635"/>
+<guid isPermaLink="false">691d7e246018cc2c9896991a</guid>
+<pubDate>Wed, 19 Nov 2025 08:35:20 GMT</pubDate>
+<description>
+<![CDATA[ <p>【进听友群+v Recallmikey】</p><p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始｜GameStart》第六十七期节目。</p><p>我们曾经在游戏开始番外篇的第一集聊过Even老师是如何在百忙之中的工作之余将碎片时间用到极致来打游戏的经历，是真正意义上的游戏时间管理大师。</p><p>然而最近Even老师整了个大活，他的宝贝女儿出生啦！！！我们都知道生娃是每个人在人生中最重要的时刻之一，那么在这个时候Even老师还能像以前那样游刃有余地管理时间来打游戏吗？Even老师生娃的前后都经历了什么呢？敬请在本期游戏开始节目中寻找答案吧！</p><p>如果各位有什么意见和建议，也欢迎在评论区留言，或者加入听友群和我们一起讨论哦～</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/691d7e246018cc2c9896991a?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>【进听友群+v Recallmikey】</p><p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始｜GameStart》第六十七期节目。</p><p>我们曾经在游戏开始番外篇的第一集聊过Even老师是如何在百忙之中的工作之余将碎片时间用到极致来打游戏的经历，是真正意义上的游戏时间管理大师。</p><p>然而最近Even老师整了个大活，他的宝贝女儿出生啦！！！我们都知道生娃是每个人在人生中最重要的时刻之一，那么在这个时候Even老师还能像以前那样游刃有余地管理时间来打游戏吗？Even老师生娃的前后都经历了什么呢？敬请在本期游戏开始节目中寻找答案吧！</p><p>如果各位有什么意见和建议，也欢迎在评论区留言，或者加入听友群和我们一起讨论哦～</p> ]]>
+</content:encoded>
+<itunes:duration>01:55:36</itunes:duration>
+</item>
+<item>
+<title>Vol.066 和游戏行业分手三个月，不是很想它</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/68f34de42265473020146374/media.xyzcdn.net/62de92508c5971a066098311/lk-jTtIh6S5gV1t-6fN3BhcjUZWy.m4a" type="audio/mp4" length="250419999"/>
+<guid isPermaLink="false">68f34de42265473020146374</guid>
+<pubDate>Sat, 18 Oct 2025 08:37:50 GMT</pubDate>
+<description>
+<![CDATA[ <p>【进听友群+v Recallmikey】</p><p>主播｜Even 冷场王 麦壳</p><p>始于游戏归于生活，欢迎收听《游戏开始｜GameStart》第六十六期节目！</p><p>相信游戏行业是每一位游戏玩家都希望从事的工作之一。但游戏行业的相关工作也分为很多不同的类型，如游戏开发，游戏运营，游戏宣传等等。</p><p>在游戏的宣传环节中，离不开游戏宣传视频的制作，那这些游戏宣传视频都是怎么制作出来的呢？都是谁在制作呢？这个行业又是怎样的呢？</p><p>今天游戏开始请到了游戏视频行业的资深从业人员作为“神秘嘉宾”，听他讲述他从事这个行业的始末。</p><p>要是有啥想法、建议，或者想跟我们一起讨论脑洞，欢迎在评论区留言，或加入听友群讨论哦~</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/68f34de42265473020146374?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>【进听友群+v Recallmikey】</p><p>主播｜Even 冷场王 麦壳</p><p>始于游戏归于生活，欢迎收听《游戏开始｜GameStart》第六十六期节目！</p><p>相信游戏行业是每一位游戏玩家都希望从事的工作之一。但游戏行业的相关工作也分为很多不同的类型，如游戏开发，游戏运营，游戏宣传等等。</p><p>在游戏的宣传环节中，离不开游戏宣传视频的制作，那这些游戏宣传视频都是怎么制作出来的呢？都是谁在制作呢？这个行业又是怎样的呢？</p><p>今天游戏开始请到了游戏视频行业的资深从业人员作为“神秘嘉宾”，听他讲述他从事这个行业的始末。</p><p>要是有啥想法、建议，或者想跟我们一起讨论脑洞，欢迎在评论区留言，或加入听友群讨论哦~</p> ]]>
+</content:encoded>
+<itunes:duration>02:09:39</itunes:duration>
+</item>
+<item>
+<title>Vol.065 我还没说完！再聊钟馗</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/68db3550b4befcf730900fb8/media.xyzcdn.net/62de92508c5971a066098311/llSZ6pvdQLCZOLJkChJchSsbtM-F.m4a" type="audio/mp4" length="174149996"/>
+<guid isPermaLink="false">68db3550b4befcf730900fb8</guid>
+<pubDate>Tue, 30 Sep 2025 02:05:06 GMT</pubDate>
+<description>
+<![CDATA[ <p>【进听友群+v Recallmikey】</p><p>主播｜Even 冷场王 麦壳</p><p>始于游戏归于生活，咱们的《游戏开始｜GameStart》第六十五期准时上线！​</p><p>大家还记得不？之前聊《黑神话：钟馗》的时候，咱光靠脑洞就聊得停不下来，但因为节目形式原因，好多有意思的角度都没来得及深入聊。</p><p>所以这次！我们把压箱底的 “存货” 全翻出来啦～专门再开一期，接着聊《黑神话：钟馗》可能藏着的游戏机制、出色的美术设计，还有让人眼前一亮的创新点！（大量无端脑洞预警）​</p><p>以及，主播们提前祝大家国庆玩得开心、吃得满足，每天都有好心情～​</p><p>要是有啥想法、建议，或者想跟我们一起讨论脑洞，欢迎在评论区留言，或加入听友群讨论哦~</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/68db3550b4befcf730900fb8?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>【进听友群+v Recallmikey】</p><p>主播｜Even 冷场王 麦壳</p><p>始于游戏归于生活，咱们的《游戏开始｜GameStart》第六十五期准时上线！​</p><p>大家还记得不？之前聊《黑神话：钟馗》的时候，咱光靠脑洞就聊得停不下来，但因为节目形式原因，好多有意思的角度都没来得及深入聊。</p><p>所以这次！我们把压箱底的 “存货” 全翻出来啦～专门再开一期，接着聊《黑神话：钟馗》可能藏着的游戏机制、出色的美术设计，还有让人眼前一亮的创新点！（大量无端脑洞预警）​</p><p>以及，主播们提前祝大家国庆玩得开心、吃得满足，每天都有好心情～​</p><p>要是有啥想法、建议，或者想跟我们一起讨论脑洞，欢迎在评论区留言，或加入听友群讨论哦~</p> ]]>
+</content:encoded>
+<itunes:duration>02:00:04</itunes:duration>
+</item>
+<item>
+<title>Vol.064 没苦硬吃有意义吗？闲聊《丝之歌》</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/68c7c1a5a56ca3e0c47cf3bf/media.xyzcdn.net/62de92508c5971a066098311/lsaibsUP_dYTYNUNH1Zh04KtjUIU.m4a" type="audio/mp4" length="193812968"/>
+<guid isPermaLink="false">68c7c1a5a56ca3e0c47cf3bf</guid>
+<pubDate>Mon, 15 Sep 2025 07:42:32 GMT</pubDate>
+<description>
+<![CDATA[ <p>【进听友群+v Recallmikey】</p><p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始｜GameStart》第六十四期节目。</p><p>最近大热的游戏《空洞骑士：丝之歌》让无数玩家破防，甚至有极端玩家将此游戏命名为《空洞骑士：傻之X》，可见网友破防之厉害。</p><p>本期节目我们将结合游戏的初体验，详细聊聊这种“跳跳乐”类游戏是如何让人破防的，我们为什么对这类游戏失去了耐心？玩不动这类游戏到底是我们的问题还是游戏的问题？</p><p>敬请收听本期游戏开始，或许您也会有和我们类似的游戏体验！</p><p>如果各位有什么意见和建议，也欢迎留言讨论～</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/68c7c1a5a56ca3e0c47cf3bf?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>【进听友群+v Recallmikey】</p><p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始｜GameStart》第六十四期节目。</p><p>最近大热的游戏《空洞骑士：丝之歌》让无数玩家破防，甚至有极端玩家将此游戏命名为《空洞骑士：傻之X》，可见网友破防之厉害。</p><p>本期节目我们将结合游戏的初体验，详细聊聊这种“跳跳乐”类游戏是如何让人破防的，我们为什么对这类游戏失去了耐心？玩不动这类游戏到底是我们的问题还是游戏的问题？</p><p>敬请收听本期游戏开始，或许您也会有和我们类似的游戏体验！</p><p>如果各位有什么意见和建议，也欢迎留言讨论～</p> ]]>
+</content:encoded>
+<itunes:duration>01:40:24</itunes:duration>
+</item>
+<item>
+<title>番外篇02：《黑神话钟馗》圆桌畅聊feat.进击的沈帅波</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/68b102d15faf368659f24045/media.xyzcdn.net/62de92508c5971a066098311/lqUKXiCMt7xXqV438lEeR4s5OIJ1.m4a" type="audio/mp4" length="174267367"/>
+<guid isPermaLink="false">68b102d15faf368659f24045</guid>
+<pubDate>Fri, 29 Aug 2025 01:39:17 GMT</pubDate>
+<description>
+<![CDATA[ <p>【进听友群+v Recallmikey】</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始｜Game Start》番外篇的第二集。</p><p>我们这次很荣幸能够跟财经节目【<a href="https://www.xiaoyuzhoufm.com/podcast/63622ece910f1acc8e48d49e">进击的沈帅波</a>】进行了一期联动，一起畅聊了一下《黑神话钟馗》的过去，现在与未来。那么如果对财经感兴趣的小伙伴们也可以订阅【<a href="https://www.xiaoyuzhoufm.com/podcast/63622ece910f1acc8e48d49e">进击的沈帅波</a>】这档播客。</p><p>01:53&nbsp;黑猴通关率：Steam 水分多，主机党才是真硬核</p><p>03:54&nbsp;做钟馗不做 DLC？游戏科学这波操作引发全网分析</p><p>07:45&nbsp;育碧加班全靠成都西安？</p><p>12:49&nbsp;国产 3A 差距在哪？画面能打，管理和整合是硬伤！</p><p>21:50&nbsp;玩家圈也有局部富人现象？手游充几万，3A 几百块嫌贵？</p><p>27:10&nbsp;国产 3A 海外火了？别吹！才刚起步～</p><p>33:35&nbsp;老外做中国题材游戏：全战三国试水，虽然有翻车但还是天花板</p><p>39:04&nbsp;明末为什么翻车？归唐好玩吗？</p><p>47:52&nbsp;使命召唤收入不如《糖果传奇》？</p><p>51:16&nbsp;对钟馗期待值拉满！但也要注意这些坑</p><p>59:42&nbsp;3A 成本大起底！战地 2042 花 20 亿是因为翻车？</p><p>01:15:45&nbsp;好的 3A 怎么诞生？经济 + 政策 + 神仙制作人！</p><p>01:25:28&nbsp;&nbsp;玩 3A 能戒刷手机瘾！专注动脑，比刷社交媒体强～</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/68b102d15faf368659f24045?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>【进听友群+v Recallmikey】</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始｜Game Start》番外篇的第二集。</p><p>我们这次很荣幸能够跟财经节目【<a href="https://www.xiaoyuzhoufm.com/podcast/63622ece910f1acc8e48d49e">进击的沈帅波</a>】进行了一期联动，一起畅聊了一下《黑神话钟馗》的过去，现在与未来。那么如果对财经感兴趣的小伙伴们也可以订阅【<a href="https://www.xiaoyuzhoufm.com/podcast/63622ece910f1acc8e48d49e">进击的沈帅波</a>】这档播客。</p><p>01:53&nbsp;黑猴通关率：Steam 水分多，主机党才是真硬核</p><p>03:54&nbsp;做钟馗不做 DLC？游戏科学这波操作引发全网分析</p><p>07:45&nbsp;育碧加班全靠成都西安？</p><p>12:49&nbsp;国产 3A 差距在哪？画面能打，管理和整合是硬伤！</p><p>21:50&nbsp;玩家圈也有局部富人现象？手游充几万，3A 几百块嫌贵？</p><p>27:10&nbsp;国产 3A 海外火了？别吹！才刚起步～</p><p>33:35&nbsp;老外做中国题材游戏：全战三国试水，虽然有翻车但还是天花板</p><p>39:04&nbsp;明末为什么翻车？归唐好玩吗？</p><p>47:52&nbsp;使命召唤收入不如《糖果传奇》？</p><p>51:16&nbsp;对钟馗期待值拉满！但也要注意这些坑</p><p>59:42&nbsp;3A 成本大起底！战地 2042 花 20 亿是因为翻车？</p><p>01:15:45&nbsp;好的 3A 怎么诞生？经济 + 政策 + 神仙制作人！</p><p>01:25:28&nbsp;&nbsp;玩 3A 能戒刷手机瘾！专注动脑，比刷社交媒体强～</p> ]]>
+</content:encoded>
+<itunes:duration>01:30:16</itunes:duration>
+</item>
+<item>
+<title>Vol.063 明末不仅有地雷，还有二极管！闲聊《明末：渊虚之羽》</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/689456f846542d8c41f2b1b4/media.xyzcdn.net/62de92508c5971a066098311/loqNyk2n8BMrZ6lu5_wPRrP6CMuN.m4a" type="audio/mp4" length="331065195"/>
+<guid isPermaLink="false">689456f846542d8c41f2b1b4</guid>
+<pubDate>Thu, 07 Aug 2025 07:51:58 GMT</pubDate>
+<description>
+<![CDATA[ <p>【进听友群+v Recallmikey】</p><p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始｜GameStart》第六十三期节目。</p><p>最近“村里的第二个大学生”《明末：渊虚之羽》如期发售，自发售第一天起就引来了极大的争议。</p><p>随着游戏发售一周有余，Even已经通关了游戏，而麦壳也对游戏进行了50余小时的体验。那么《明末：渊虚之羽》这部国产第二个3A游戏真的有网上喷的如此不堪吗？其中历史问题真的有“歪屁股”吗？如何看待游戏没有清军？</p><p>敬请收听本期游戏开始，相信您能找到答案！</p><p>如果各位有什么意见和建议，欢迎留言讨论～</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/689456f846542d8c41f2b1b4?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>【进听友群+v Recallmikey】</p><p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始｜GameStart》第六十三期节目。</p><p>最近“村里的第二个大学生”《明末：渊虚之羽》如期发售，自发售第一天起就引来了极大的争议。</p><p>随着游戏发售一周有余，Even已经通关了游戏，而麦壳也对游戏进行了50余小时的体验。那么《明末：渊虚之羽》这部国产第二个3A游戏真的有网上喷的如此不堪吗？其中历史问题真的有“歪屁股”吗？如何看待游戏没有清军？</p><p>敬请收听本期游戏开始，相信您能找到答案！</p><p>如果各位有什么意见和建议，欢迎留言讨论～</p> ]]>
+</content:encoded>
+<itunes:duration>02:51:30</itunes:duration>
+</item>
+<item>
+<title>Vol.062 再战下一个三年！游戏开始三周年特别节目</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/6882f4b3a9dec925001146af/media.xyzcdn.net/62de92508c5971a066098311/lj8BTYMCNbXqjzKUyGCYwjGmeqNi.m4a" type="audio/mp4" length="275128598"/>
+<guid isPermaLink="false">6882f4b3a9dec925001146af</guid>
+<pubDate>Fri, 25 Jul 2025 03:09:57 GMT</pubDate>
+<description>
+<![CDATA[ <p>【进听友群+v Recallmikey】</p><p>听众朋友们！我们三！周！年！啦！​​</p><p>掐指一算，《游戏开始 | GameStart》这档播客居然已经伴随着各位玩家度过了整整三个年头！感谢大家一路以来的倾听、吐槽、催更和爆笑互动！没有你们的支持，我们可能早就扛不过三次版本更新了！</p><p>为了庆祝这个意义重大的里程碑，我们特别准备了三周年特别节目​​ ！本期节目内容超——丰富！</p><p>回忆杀 &amp; 进化论：​​ 一起坐上时光机，回望这三年里最印象深刻的节目，聊过的高能/迷惑话题，玩过的高光/扑街游戏。我们的游戏口味变了吗？有哪些预言成真？哪些打脸来得猝不及防？（以及麦克风质量……有变好吗？）满满都是情怀和爆笑回忆！</p><p>主播真心话大冒险：​​ 三周年限定环节之完播率排行榜！聊聊坚持下来的动力，期间遇到的各种“名场面”和幕后小花絮。可能还会互相“伤害”一下？敬请期待！</p><p>重头戏福利时间！</p><p>为了表达我们如滔滔江水连绵不绝的感激之情，三位主播特意​​准备了10份三周年限定小礼物！希望大家喜欢~</p><p>想成为幸运儿？方法超简单~​​ 就是加群！加群！还是***的加群！</p><p>三周年，感谢有你相伴！​​</p><p>无论你是从第一期就开始追更的老伙计，还是刚刚关注我们播客的新朋友，希望这期充满回忆、笑声和感恩的特别节目，能带给你双倍的快乐！</p><p>锁定《游戏开始 | GameStart》，让我们一起Game Start！再战下个三年！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/6882f4b3a9dec925001146af?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>【进听友群+v Recallmikey】</p><p>听众朋友们！我们三！周！年！啦！​​</p><p>掐指一算，《游戏开始 | GameStart》这档播客居然已经伴随着各位玩家度过了整整三个年头！感谢大家一路以来的倾听、吐槽、催更和爆笑互动！没有你们的支持，我们可能早就扛不过三次版本更新了！</p><p>为了庆祝这个意义重大的里程碑，我们特别准备了三周年特别节目​​ ！本期节目内容超——丰富！</p><p>回忆杀 &amp; 进化论：​​ 一起坐上时光机，回望这三年里最印象深刻的节目，聊过的高能/迷惑话题，玩过的高光/扑街游戏。我们的游戏口味变了吗？有哪些预言成真？哪些打脸来得猝不及防？（以及麦克风质量……有变好吗？）满满都是情怀和爆笑回忆！</p><p>主播真心话大冒险：​​ 三周年限定环节之完播率排行榜！聊聊坚持下来的动力，期间遇到的各种“名场面”和幕后小花絮。可能还会互相“伤害”一下？敬请期待！</p><p>重头戏福利时间！</p><p>为了表达我们如滔滔江水连绵不绝的感激之情，三位主播特意​​准备了10份三周年限定小礼物！希望大家喜欢~</p><p>想成为幸运儿？方法超简单~​​ 就是加群！加群！还是***的加群！</p><p>三周年，感谢有你相伴！​​</p><p>无论你是从第一期就开始追更的老伙计，还是刚刚关注我们播客的新朋友，希望这期充满回忆、笑声和感恩的特别节目，能带给你双倍的快乐！</p><p>锁定《游戏开始 | GameStart》，让我们一起Game Start！再战下个三年！</p> ]]>
+</content:encoded>
+<itunes:duration>02:22:27</itunes:duration>
+</item>
+<item>
+<title>Vol.061 圆桌讨论：现代游戏的“瓶颈”与破局</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/686e3b1c60f8f77d40a677e5/media.xyzcdn.net/62de92508c5971a066098311/lhnJjk3cuAyp-p2pnCSAuqUmo7JA.m4a" type="audio/mp4" length="312085742"/>
+<guid isPermaLink="false">686e3b1c60f8f77d40a677e5</guid>
+<pubDate>Wed, 09 Jul 2025 09:52:14 GMT</pubDate>
+<description>
+<![CDATA[ <p>【进听友群+v Recallmikey】</p><p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始｜GameStart》第六十一期。</p><p>最近这些年，每当我们玩到新发售的游戏，总感觉这些游戏似曾相识，总觉得在哪见过，或者认为它们与前作相比，差别不大。</p><p>总有一种感觉，这些年游戏发展出现了瓶颈，越来越难出现一款类似《GTA5》《血源》《最后生还者》《塞尔达传说：旷野之息》《死亡搁浅》这样能让人眼前一亮，津津乐道，能够为未来游戏提供发展方向的游戏。</p><p>那么电子游戏发展到今天，真的遇到瓶颈了吗？遇到瓶颈的原因有哪些？未来有哪些办法可以突破瓶颈？</p><p>今天，科技推崇者Even，杠上开花者冷场王，游戏漠然者麦壳将与大家精彩讨论有关游戏瓶颈的相关话题，欢迎收听～</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/686e3b1c60f8f77d40a677e5?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>【进听友群+v Recallmikey】</p><p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始｜GameStart》第六十一期。</p><p>最近这些年，每当我们玩到新发售的游戏，总感觉这些游戏似曾相识，总觉得在哪见过，或者认为它们与前作相比，差别不大。</p><p>总有一种感觉，这些年游戏发展出现了瓶颈，越来越难出现一款类似《GTA5》《血源》《最后生还者》《塞尔达传说：旷野之息》《死亡搁浅》这样能让人眼前一亮，津津乐道，能够为未来游戏提供发展方向的游戏。</p><p>那么电子游戏发展到今天，真的遇到瓶颈了吗？遇到瓶颈的原因有哪些？未来有哪些办法可以突破瓶颈？</p><p>今天，科技推崇者Even，杠上开花者冷场王，游戏漠然者麦壳将与大家精彩讨论有关游戏瓶颈的相关话题，欢迎收听～</p> ]]>
+</content:encoded>
+<itunes:duration>02:41:40</itunes:duration>
+</item>
+<item>
+<title>Vol.060 老任你变了！闲聊Switch2</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/684ebd4a2a38b4d979c0f079/media.xyzcdn.net/62de92508c5971a066098311/lqXlU4QYx_GpMwEfERkQBZOqVZSG.m4a" type="audio/mp4" length="184074521"/>
+<guid isPermaLink="false">684ebd4a2a38b4d979c0f079</guid>
+<pubDate>Sun, 15 Jun 2025 12:36:08 GMT</pubDate>
+<description>
+<![CDATA[ <p>【进听友群+v Recallmikey】</p><p>Switch2发售已一周有余，关于这台机器的硬件评测，相信大家已经在各大平台了解到很多了</p><p>三位主播在亲身感受这台蓄势多年的“次时代”主机后，也久违地坐在一起聊了聊关于它的看法。</p><p>Switch2与上代主机有何变化？能否延续Switch1的影响力？它的出现对于玩家、任天堂、游戏界意味着什么？</p><p>今天，王泪双排老花眼冷场王、ACT原教旨主义麦壳、手游求道家even与大家精彩讨论关于Switch2的种种感受，欢迎收听~</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/684ebd4a2a38b4d979c0f079?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>【进听友群+v Recallmikey】</p><p>Switch2发售已一周有余，关于这台机器的硬件评测，相信大家已经在各大平台了解到很多了</p><p>三位主播在亲身感受这台蓄势多年的“次时代”主机后，也久违地坐在一起聊了聊关于它的看法。</p><p>Switch2与上代主机有何变化？能否延续Switch1的影响力？它的出现对于玩家、任天堂、游戏界意味着什么？</p><p>今天，王泪双排老花眼冷场王、ACT原教旨主义麦壳、手游求道家even与大家精彩讨论关于Switch2的种种感受，欢迎收听~</p> ]]>
+</content:encoded>
+<itunes:duration>02:06:50</itunes:duration>
+</item>
+<item>
+<title>《若游所思》01——日常任务</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/68426ae279e285b9b8803472/media.xyzcdn.net/62de92508c5971a066098311/lsxoHwK8Ba4Pl9lmcksMXeDGTDbT.m4a" type="audio/mp4" length="37841506"/>
+<guid isPermaLink="false">68426ae279e285b9b8803472</guid>
+<pubDate>Fri, 06 Jun 2025 04:35:47 GMT</pubDate>
+<description>
+<![CDATA[ <p>进听友群+v Recallmikey</p><p>我发现，生活其实并不单调，重要的是，你如何看待生活。一花一世界，一叶一菩提。我们在被社会所定义的目标牵着鼻子走的过程中，不知不觉失去了感受生活的能力。其实吗，每一寸皮肤的感受，每一个邂逅的瞬间，都是生活给予我们的调味品，而他们得来的却太过容易，从而让我们忽略的其中的价值。我们追寻高难度的，稀有的，不易达成的成就。但是否想过，难得和稀有，却不一定代表适合。随处可见，唾手可得的事物，也可以是生命的馈赠，生活的精彩，不是吗?</p><p>太阳照常升起，但祝愿大家，在平淡的日常中，亦能收获精彩。</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/68426ae279e285b9b8803472?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>进听友群+v Recallmikey</p><p>我发现，生活其实并不单调，重要的是，你如何看待生活。一花一世界，一叶一菩提。我们在被社会所定义的目标牵着鼻子走的过程中，不知不觉失去了感受生活的能力。其实吗，每一寸皮肤的感受，每一个邂逅的瞬间，都是生活给予我们的调味品，而他们得来的却太过容易，从而让我们忽略的其中的价值。我们追寻高难度的，稀有的，不易达成的成就。但是否想过，难得和稀有，却不一定代表适合。随处可见，唾手可得的事物，也可以是生命的馈赠，生活的精彩，不是吗?</p><p>太阳照常升起，但祝愿大家，在平淡的日常中，亦能收获精彩。</p> ]]>
+</content:encoded>
+<itunes:duration>00:38:57</itunes:duration>
+</item>
+<item>
+<title>番外篇01：为了玩游戏，我成为了时间管理大师！</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/68313e1541ef875a12f33053/media.xyzcdn.net/62de92508c5971a066098311/lg4G6VVhlPJko4VsCLruGJfv_Afw.m4a" type="audio/mp4" length="72617041"/>
+<guid isPermaLink="false">68313e1541ef875a12f33053</guid>
+<pubDate>Sat, 24 May 2025 03:41:43 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始｜GameStart》第一期番外篇！</p><p>在这个快节奏人人忙碌的时代，你是否也在寻找如何平衡家庭、工作与打游戏的时间分配秘诀？今天，我们带着独家秘方来了！</p><p>本来是三位主播团建吃饭，麦壳突发奇想策划了一期节目，现场录音，拷打Even老师如何在有家庭、工作和乱七八糟杂事的情况下，还能同时兼顾玩那么多游戏？</p><p>让我们一起揭开Even老师的时间管理秘密武器！</p><p>P.S.本期音频为突发奇想户外手机录制，由于环境音嘈杂，音质不够理想，望听众海涵！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/68313e1541ef875a12f33053?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始｜GameStart》第一期番外篇！</p><p>在这个快节奏人人忙碌的时代，你是否也在寻找如何平衡家庭、工作与打游戏的时间分配秘诀？今天，我们带着独家秘方来了！</p><p>本来是三位主播团建吃饭，麦壳突发奇想策划了一期节目，现场录音，拷打Even老师如何在有家庭、工作和乱七八糟杂事的情况下，还能同时兼顾玩那么多游戏？</p><p>让我们一起揭开Even老师的时间管理秘密武器！</p><p>P.S.本期音频为突发奇想户外手机录制，由于环境音嘈杂，音质不够理想，望听众海涵！</p> ]]>
+</content:encoded>
+<itunes:duration>01:14:50</itunes:duration>
+</item>
+<item>
+<title>Vol.059 拖更都怪它！闲聊《双影奇境》</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/6811bf6647ebeede7e28615e/media.xyzcdn.net/62de92508c5971a066098311/lgzPXiS3p705ZAbYWG8wqQV3Ml5f.m4a" type="audio/mp4" length="217619756"/>
+<guid isPermaLink="false">6811bf6647ebeede7e28615e</guid>
+<pubDate>Wed, 30 Apr 2025 06:30:53 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播丨Even 冷场王 麦壳</p><p>始于游戏，归于生活</p><p>《双影奇境》发售已近两月...</p><p>但三位主播却只有一人达成通关成就。</p><p>游戏开始为何屡次拖更？</p><p>是什么让冷场王与搭子大打出手？</p><p>全面升级的背后，隐藏着怎样的代价？</p><p>欢迎来到本期《游戏开始GAME START》，聆听人性的扭曲与道德的沦丧...</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/6811bf6647ebeede7e28615e?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播丨Even 冷场王 麦壳</p><p>始于游戏，归于生活</p><p>《双影奇境》发售已近两月...</p><p>但三位主播却只有一人达成通关成就。</p><p>游戏开始为何屡次拖更？</p><p>是什么让冷场王与搭子大打出手？</p><p>全面升级的背后，隐藏着怎样的代价？</p><p>欢迎来到本期《游戏开始GAME START》，聆听人性的扭曲与道德的沦丧...</p> ]]>
+</content:encoded>
+<itunes:duration>01:52:44</itunes:duration>
+</item>
+<item>
+<title>《若游所思》试播集——做播客，让我认识何为热爱</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/67f8b0c659699d74dc02db86/media.xyzcdn.net/62de92508c5971a066098311/lnZaP_BwDnesptbjEy92I4dL_hNr.m4a" type="audio/mp4" length="72171409"/>
+<guid isPermaLink="false">67f8b0c659699d74dc02db86</guid>
+<pubDate>Fri, 11 Apr 2025 06:16:34 GMT</pubDate>
+<description>
+<![CDATA[ <p>在我许多年的游戏经历中，我通过游戏获得了许多感悟。</p><p>游戏对我来说已经不是一个消遣，而是一种自我探索的工具了，另一个大家比较能理解的例子是绘画，很多历史上著名的画家都是通过感悟绘画中的道理，来指导自己的人生的，我在学习绘画的过程中多少也有这种感觉，比如做成一件事，要整体规划，有所取舍，切忌反复无常，要在资源有限的情况下做出最优解。</p><p>我也是通过在绘画中感悟的道理来做博客的，但逐渐的，我感悟与探索的工具越来越偏向游戏了。</p><p>所以我希望记录自己在游戏中探索自我的过程，分享给大家，让博客内容并不只是讨论游戏设计、游戏文化，也谈论谈论玩游戏的人，研究游戏在人的自我探索中所能起到的作用。</p><p>第一期为了尽量拉低理解门槛，我没有选择某一款特定游戏作为感悟对象，而是选择了这个节目，即《游戏开始》作为试播集的主角，我将通过这两年对做播客的反思，探讨一个看起来很简单，但却实打实的影响了我人生前30年的一个问题，那就是：如何辨别什么是我们真正热爱的事物？</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/67f8b0c659699d74dc02db86?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>在我许多年的游戏经历中，我通过游戏获得了许多感悟。</p><p>游戏对我来说已经不是一个消遣，而是一种自我探索的工具了，另一个大家比较能理解的例子是绘画，很多历史上著名的画家都是通过感悟绘画中的道理，来指导自己的人生的，我在学习绘画的过程中多少也有这种感觉，比如做成一件事，要整体规划，有所取舍，切忌反复无常，要在资源有限的情况下做出最优解。</p><p>我也是通过在绘画中感悟的道理来做博客的，但逐渐的，我感悟与探索的工具越来越偏向游戏了。</p><p>所以我希望记录自己在游戏中探索自我的过程，分享给大家，让博客内容并不只是讨论游戏设计、游戏文化，也谈论谈论玩游戏的人，研究游戏在人的自我探索中所能起到的作用。</p><p>第一期为了尽量拉低理解门槛，我没有选择某一款特定游戏作为感悟对象，而是选择了这个节目，即《游戏开始》作为试播集的主角，我将通过这两年对做播客的反思，探讨一个看起来很简单，但却实打实的影响了我人生前30年的一个问题，那就是：如何辨别什么是我们真正热爱的事物？</p> ]]>
+</content:encoded>
+<itunes:duration>00:49:43</itunes:duration>
+</item>
+<item>
+<title>Vol.058 《怪物猎人荒野》背后——卡普空的“逆境之魂”</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/67bdd8dc05a90dfd0dd30f8c/media.xyzcdn.net/62de92508c5971a066098311/lrQQcX6tjO0g8qtdhDXRXobuAAsr.m4a" type="audio/mp4" length="219032465"/>
+<guid isPermaLink="false">67bdd8dc05a90dfd0dd30f8c</guid>
+<pubDate>Tue, 25 Feb 2025 15:16:41 GMT</pubDate>
+<description>
+<![CDATA[ <p>从《街头霸王》到《怪物猎人》，卡普空在他成立的46年中，无数次为世界玩家们创造了精彩纷呈的游戏世界。</p><p>经久不衰的秘诀究竟是什么？面对困境，卡普空又是如何破而后立，逆境重生的？</p><p>本期，我们就来聊聊这家“动作天尊”卡普空的诞生故事</p><p>1、前言（22：16 ）</p><p>2、一切的开端（10：39）&nbsp;</p><p>3、街机时代（41：23 ）</p><p>4、“雅达利大崩溃”与卡普空的崛起（1：01：35 ）</p><p>5、完全体，诞生！（1：38：33 ）</p><p>6、世纪末的挑战（01：48：30 ）</p><p>7、逆境重生（02：06：21 ）</p><p>如果你喜欢本期节目，欢迎订阅我们的频道，也可加入听友群与群友吹水聊天（进群方式见节目简介）</p><p>如果有任何意见和建议，也欢迎评论区讨论，我们下期，不见不散！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/67bdd8dc05a90dfd0dd30f8c?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>从《街头霸王》到《怪物猎人》，卡普空在他成立的46年中，无数次为世界玩家们创造了精彩纷呈的游戏世界。</p><p>经久不衰的秘诀究竟是什么？面对困境，卡普空又是如何破而后立，逆境重生的？</p><p>本期，我们就来聊聊这家“动作天尊”卡普空的诞生故事</p><p>1、前言（22：16 ）</p><p>2、一切的开端（10：39）&nbsp;</p><p>3、街机时代（41：23 ）</p><p>4、“雅达利大崩溃”与卡普空的崛起（1：01：35 ）</p><p>5、完全体，诞生！（1：38：33 ）</p><p>6、世纪末的挑战（01：48：30 ）</p><p>7、逆境重生（02：06：21 ）</p><p>如果你喜欢本期节目，欢迎订阅我们的频道，也可加入听友群与群友吹水聊天（进群方式见节目简介）</p><p>如果有任何意见和建议，也欢迎评论区讨论，我们下期，不见不散！</p> ]]>
+</content:encoded>
+<itunes:duration>02:30:55</itunes:duration>
+</item>
+<item>
+<title>Vol.057 始于游戏，归于生活-年度总结篇</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/6792fff2247d51713cf545e8/media.xyzcdn.net/62de92508c5971a066098311/luIJNfhEmsFl54gRGhG3v6rMkeQr.m4a" type="audio/mp4" length="311200975"/>
+<guid isPermaLink="false">6792fff2247d51713cf545e8</guid>
+<pubDate>Fri, 24 Jan 2025 03:14:39 GMT</pubDate>
+<description>
+<![CDATA[ <p>各位老粉丝，新朋友，游戏开始节目组在这里恭祝大家——新·年·好！！！</p><p>值此新旧交替之际，我们准备回顾一下各自在过去一年中的成功与失败、遗憾与收获，并为新年的自己说一句话。</p><p>另外，我们也征集了听友们的“年度之声”，并作为嘴替，对大家的年度总结进行“锐评”。</p><p>2024已经过去，新的一年悄然来临，希望大家在蛇年里，继续行大运、发大财，事业旺，身体棒！让我们一起，迎接新年的到来吧~~</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/6792fff2247d51713cf545e8?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>各位老粉丝，新朋友，游戏开始节目组在这里恭祝大家——新·年·好！！！</p><p>值此新旧交替之际，我们准备回顾一下各自在过去一年中的成功与失败、遗憾与收获，并为新年的自己说一句话。</p><p>另外，我们也征集了听友们的“年度之声”，并作为嘴替，对大家的年度总结进行“锐评”。</p><p>2024已经过去，新的一年悄然来临，希望大家在蛇年里，继续行大运、发大财，事业旺，身体棒！让我们一起，迎接新年的到来吧~~</p> ]]>
+</content:encoded>
+<itunes:duration>02:41:08</itunes:duration>
+</item>
+<item>
+<title>Vol.056 如何评价“游戏评价”?从TGA说起</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/67774da015a5fd520ea85d0a/media.xyzcdn.net/llEDb9Qq0_i_WbnzQhDGT8Q8r0Kc.m4a" type="audio/mp4" length="309262417"/>
+<guid isPermaLink="false">67774da015a5fd520ea85d0a</guid>
+<pubDate>Fri, 03 Jan 2025 03:06:40 GMT</pubDate>
+<description>
+<![CDATA[ <p>TGA尘埃落定，黑猴未能夺得年度游戏，虽然只是一件名利的袈裟，但遗憾终归是遗憾。</p><p>为什么一款游戏需要被评价，为什么我们需要一个面向公众的、权威的、辐射范围较广的评价机构或媒体？如何评价一款游戏，才能尽量让更多的人认可？本期，三位主播就从本届TGA开始，聊一聊关于“游戏评价”的评价，欢迎收听~</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/67774da015a5fd520ea85d0a?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>TGA尘埃落定，黑猴未能夺得年度游戏，虽然只是一件名利的袈裟，但遗憾终归是遗憾。</p><p>为什么一款游戏需要被评价，为什么我们需要一个面向公众的、权威的、辐射范围较广的评价机构或媒体？如何评价一款游戏，才能尽量让更多的人认可？本期，三位主播就从本届TGA开始，聊一聊关于“游戏评价”的评价，欢迎收听~</p> ]]>
+</content:encoded>
+<itunes:duration>02:40:12</itunes:duration>
+</item>
+<item>
+<title>Vol.055 人生不能既要又要丨《双城之战2》圆桌讨论</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/67595cd217cd5416ad4050f3/media.xyzcdn.net/lgHwEjp-dmQCL973-pxJKQCK5m86.m4a" type="audio/mp4" length="228475401"/>
+<guid isPermaLink="false">67595cd217cd5416ad4050f3</guid>
+<pubDate>Wed, 11 Dec 2024 09:59:47 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始Game Start》第五十五期节目。</p><p>最近完结的《双城之战2》，想必在每个人心中都留下了深刻的印象。</p><p>极致视听、完美游改，是大众对于拳头游戏和Fortiche Production制作水准的高度认可，但同时，虎头蛇尾、美式饺子，也同样是这部剧所无法摆脱的小小阴影。</p><p>无论怎样，发生在祖安与皮尔特沃夫的故事已经告一段落，俗话说“盖棺定论”，今天，三位主播就围绕《双城之战2》的剧情与角色，展开一场圆桌讨论，并对剧情走向与人物塑造发表自己的感想，欢迎收听~</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/67595cd217cd5416ad4050f3?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始Game Start》第五十五期节目。</p><p>最近完结的《双城之战2》，想必在每个人心中都留下了深刻的印象。</p><p>极致视听、完美游改，是大众对于拳头游戏和Fortiche Production制作水准的高度认可，但同时，虎头蛇尾、美式饺子，也同样是这部剧所无法摆脱的小小阴影。</p><p>无论怎样，发生在祖安与皮尔特沃夫的故事已经告一段落，俗话说“盖棺定论”，今天，三位主播就围绕《双城之战2》的剧情与角色，展开一场圆桌讨论，并对剧情走向与人物塑造发表自己的感想，欢迎收听~</p> ]]>
+</content:encoded>
+<itunes:duration>02:37:25</itunes:duration>
+</item>
+<item>
+<title>Vol.054 从冰汽时代2开始，聊聊大环境和我们</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/673ff6f68d1233fb0d1c1c78/media.xyzcdn.net/luSL21dKbDnQ_Xbd-Q5EZM1RcPNJ.m4a" type="audio/mp4" length="238425154"/>
+<guid isPermaLink="false">673ff6f68d1233fb0d1c1c78</guid>
+<pubDate>Fri, 22 Nov 2024 04:01:59 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播|EVEN 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始Game Start》第五十四期节目。</p><p>“本期高丧注意”</p><p>本以为离自己很远的事，也许在某一天就会突然发生在自己身上。</p><p>三位主播最近都逐渐被大环境所影响，生活不易，打工人叹气。而EVEN最近在玩《冰汽时代2》时，突然对游戏与现实之间的关系有了一些新的感想，于是有了本期节目。</p><p>不管怎样，愿大家都能找到自己“心灵的小岛”。</p><p>如果你喜欢本期的“生活杂谈”向主题，欢迎在评论区进行反馈与讨论，你的支持就是我们最大的动力~</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/673ff6f68d1233fb0d1c1c78?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播|EVEN 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始Game Start》第五十四期节目。</p><p>“本期高丧注意”</p><p>本以为离自己很远的事，也许在某一天就会突然发生在自己身上。</p><p>三位主播最近都逐渐被大环境所影响，生活不易，打工人叹气。而EVEN最近在玩《冰汽时代2》时，突然对游戏与现实之间的关系有了一些新的感想，于是有了本期节目。</p><p>不管怎样，愿大家都能找到自己“心灵的小岛”。</p><p>如果你喜欢本期的“生活杂谈”向主题，欢迎在评论区进行反馈与讨论，你的支持就是我们最大的动力~</p> ]]>
+</content:encoded>
+<itunes:duration>02:03:27</itunes:duration>
+</item>
+<item>
+<title>Vol.053 《黑神话悟空》圣地巡礼之山西篇</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/672041d01d2e86f67aaa6204/media.xyzcdn.net/lugmfLPUgQiDI_kfiOe28KY9YUSN.m4a" type="audio/mp4" length="274425998"/>
+<guid isPermaLink="false">672041d01d2e86f67aaa6204</guid>
+<pubDate>Tue, 29 Oct 2024 02:31:48 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜EVEN 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GAME START》第五十三期节目。</p><p>随着《黑神话悟空》游戏爆火，游戏的取景地也成了网友线下旅游打卡的热门景点。山西临汾隰县小西天更是在国庆期间频繁登上热搜。</p><p>都说地下文物看陕西，地上文物看山西，这次《黑神话悟空》的众多取景地便在陕西与山西境内。</p><p>这次麦壳老师在游玩了游戏之后，利用周末及十一假期期间，分别去到了位于陕西与山西的诸多《黑神话悟空》取景地进行了圣地巡礼。</p><p>本期节目主要为这次巡礼之旅的下半期，麦壳老师将分享他在山西的诸多见闻，你将听到：</p><p>1、前言(00：01)</p><p>2、芮城永乐宫(11：00)</p><p>3、芮城广仁王庙(27：26)</p><p>4、解州关帝庙(37：07)</p><p>5、万荣后土祠，秋风楼(45：22)</p><p>6、万荣东岳庙，飞云楼(50：51)</p><p>7、万荣稷王庙(54：50)</p><p>8、新绛龙兴寺(64：00)</p><p>9、新绛大教堂(67：56)</p><p>10、新绛福胜寺(70：50)</p><p>11、鹳雀楼(76：05)</p><p>12、临汾广胜寺(79：42)</p><p>13、平遥古城(91：18)</p><p>14、平遥双林寺(95：49)</p><p>15、平遥镇国寺(106：40)</p><p>16、太原晋祠(119：53)</p><p>17、山西博物院(131：00)</p><p>18、尾声(134：00)</p><p>注：本期节目在55：40秒处主播口误将古建筑房顶中的“硬山顶”错说成了“重山顶”，在此勘误一下，抱歉。</p><p>P.S.本次巡礼麦壳老师也拍了很多节目中提到的相关照片，并将这些照片添加了文字说明及对应时间轴整理成了《黑神话悟空巡礼山西篇图文手册》，有需要的听众朋友们可以进听友群领取，进群方式在节目简介中。</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/672041d01d2e86f67aaa6204?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜EVEN 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GAME START》第五十三期节目。</p><p>随着《黑神话悟空》游戏爆火，游戏的取景地也成了网友线下旅游打卡的热门景点。山西临汾隰县小西天更是在国庆期间频繁登上热搜。</p><p>都说地下文物看陕西，地上文物看山西，这次《黑神话悟空》的众多取景地便在陕西与山西境内。</p><p>这次麦壳老师在游玩了游戏之后，利用周末及十一假期期间，分别去到了位于陕西与山西的诸多《黑神话悟空》取景地进行了圣地巡礼。</p><p>本期节目主要为这次巡礼之旅的下半期，麦壳老师将分享他在山西的诸多见闻，你将听到：</p><p>1、前言(00：01)</p><p>2、芮城永乐宫(11：00)</p><p>3、芮城广仁王庙(27：26)</p><p>4、解州关帝庙(37：07)</p><p>5、万荣后土祠，秋风楼(45：22)</p><p>6、万荣东岳庙，飞云楼(50：51)</p><p>7、万荣稷王庙(54：50)</p><p>8、新绛龙兴寺(64：00)</p><p>9、新绛大教堂(67：56)</p><p>10、新绛福胜寺(70：50)</p><p>11、鹳雀楼(76：05)</p><p>12、临汾广胜寺(79：42)</p><p>13、平遥古城(91：18)</p><p>14、平遥双林寺(95：49)</p><p>15、平遥镇国寺(106：40)</p><p>16、太原晋祠(119：53)</p><p>17、山西博物院(131：00)</p><p>18、尾声(134：00)</p><p>注：本期节目在55：40秒处主播口误将古建筑房顶中的“硬山顶”错说成了“重山顶”，在此勘误一下，抱歉。</p><p>P.S.本次巡礼麦壳老师也拍了很多节目中提到的相关照片，并将这些照片添加了文字说明及对应时间轴整理成了《黑神话悟空巡礼山西篇图文手册》，有需要的听众朋友们可以进听友群领取，进群方式在节目简介中。</p> ]]>
+</content:encoded>
+<itunes:duration>02:22:09</itunes:duration>
+</item>
+<item>
+<title>Vol.052 《黑神话悟空》圣地巡礼之陕西篇</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/67170ad30d2f24f289dcc4dc/media.xyzcdn.net/lulnTDlghzke64VoaoVlFo48h47u.m4a" type="audio/mp4" length="215069548"/>
+<guid isPermaLink="false">67170ad30d2f24f289dcc4dc</guid>
+<pubDate>Tue, 22 Oct 2024 02:15:47 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜EVEN 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GAME START》第五十二期节目。</p><p>随着《黑神话悟空》游戏爆火，游戏的取景地也成了网友线下旅游打卡的热门景点。山西临汾隰县小西天更是在国庆期间频繁登上热搜。</p><p>都说地下文物看陕西，地上文物看山西，碰巧这次《黑神话悟空》的众多取景地便在陕西与山西境内。</p><p>这次麦壳老师在游玩了游戏之后，利用周末及十一假期期间，分别去到了位于陕西与山西的诸多《黑神话悟空》取景地进行了圣地巡礼。</p><p>本期节目主要为这次巡礼之旅的上半期，麦壳老师将分享他在陕西的诸多见闻，你将听到：</p><p>1、前言(00：01)</p><p>2、蓝田水陆庵(32：06)</p><p>3、陕西历史博物馆(58：48)</p><p>4、法门寺(74：55)</p><p>5、草堂寺(97：00)</p><p>6、碑林博物馆(103：40)</p><p>P.S.本次巡礼麦壳老师也拍了很多节目中提到的相关照片，并将这些照片添加了文字说明及对应时间轴一并整理成了《黑神话悟空巡礼陕西篇图文手册》，有需要的听众朋友们可以进听友群领取。</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/67170ad30d2f24f289dcc4dc?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜EVEN 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GAME START》第五十二期节目。</p><p>随着《黑神话悟空》游戏爆火，游戏的取景地也成了网友线下旅游打卡的热门景点。山西临汾隰县小西天更是在国庆期间频繁登上热搜。</p><p>都说地下文物看陕西，地上文物看山西，碰巧这次《黑神话悟空》的众多取景地便在陕西与山西境内。</p><p>这次麦壳老师在游玩了游戏之后，利用周末及十一假期期间，分别去到了位于陕西与山西的诸多《黑神话悟空》取景地进行了圣地巡礼。</p><p>本期节目主要为这次巡礼之旅的上半期，麦壳老师将分享他在陕西的诸多见闻，你将听到：</p><p>1、前言(00：01)</p><p>2、蓝田水陆庵(32：06)</p><p>3、陕西历史博物馆(58：48)</p><p>4、法门寺(74：55)</p><p>5、草堂寺(97：00)</p><p>6、碑林博物馆(103：40)</p><p>P.S.本次巡礼麦壳老师也拍了很多节目中提到的相关照片，并将这些照片添加了文字说明及对应时间轴一并整理成了《黑神话悟空巡礼陕西篇图文手册》，有需要的听众朋友们可以进听友群领取。</p> ]]>
+</content:encoded>
+<itunes:duration>01:51:24</itunes:duration>
+</item>
+<item>
+<title>Vol.051 敢问路在何方？《黑神话悟空》下半场圆桌</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/66ed83ab87a9242776b17352/media.xyzcdn.net/lssy3B-NGFfjQf6wEaQf4uWWqksa.m4a" type="audio/mp4" length="263407749"/>
+<guid isPermaLink="false">66ed83ab87a9242776b17352</guid>
+<pubDate>Fri, 20 Sep 2024 14:16:11 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜EVEN 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始》第五十一期节目。</p><p>《黑神话悟空》发售快接近一个月了，三位主播终于全部都通关啦！已经通关后的主播们，对这个风口浪尖上的游戏又有什么新的观点和想法呢？快来听听吧~</p><p>如果听众有对游戏有自己的看法，欢迎在评论区与我们讨论~</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/66ed83ab87a9242776b17352?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜EVEN 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始》第五十一期节目。</p><p>《黑神话悟空》发售快接近一个月了，三位主播终于全部都通关啦！已经通关后的主播们，对这个风口浪尖上的游戏又有什么新的观点和想法呢？快来听听吧~</p><p>如果听众有对游戏有自己的看法，欢迎在评论区与我们讨论~</p> ]]>
+</content:encoded>
+<itunes:duration>02:16:27</itunes:duration>
+</item>
+<item>
+<title>Vol.050 回旋镖，发射！《黑神话悟空》半场圆桌</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/66d686745a91beebb368e824/media.xyzcdn.net/lmoAwzpwuH6YE1CHVVemrhz-CChw.m4a" type="audio/mp4" length="166247097"/>
+<guid isPermaLink="false">66d686745a91beebb368e824</guid>
+<pubDate>Tue, 03 Sep 2024 03:45:55 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始》第五十期节目。</p><p>《黑神话悟空》已发售近半月，大家的进度都到哪里了呀？</p><p>关于这款作品，目前社区的评论并未呈现大家所期望的“全网吹爆”，而是充满了各种争议。从游戏玩法、剧情、到机制设计、硬性指标，几乎每一个要素都充满了正方与反方的争辩。</p><p>本期白忙大圣Even、迷路仙人冷场王、回旋镖发射器麦壳将会借着游戏体验过半的节点，与大家分享关于目前进度下关于游戏优缺点的讨论，以及围绕其延展出的想法，欢迎收听~</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/66d686745a91beebb368e824?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始》第五十期节目。</p><p>《黑神话悟空》已发售近半月，大家的进度都到哪里了呀？</p><p>关于这款作品，目前社区的评论并未呈现大家所期望的“全网吹爆”，而是充满了各种争议。从游戏玩法、剧情、到机制设计、硬性指标，几乎每一个要素都充满了正方与反方的争辩。</p><p>本期白忙大圣Even、迷路仙人冷场王、回旋镖发射器麦壳将会借着游戏体验过半的节点，与大家分享关于目前进度下关于游戏优缺点的讨论，以及围绕其延展出的想法，欢迎收听~</p> ]]>
+</content:encoded>
+<itunes:duration>01:54:33</itunes:duration>
+</item>
+<item>
+<title>Vol.049 既见未来，为何不buy？《黑神话悟空》前瞻圆桌</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/66b4641832ea61e9b11da31c/media.xyzcdn.net/ljVxGsGtAV6dABtLt0GtX3F9BIYY.m4a" type="audio/mp4" length="171324002"/>
+<guid isPermaLink="false">66b4641832ea61e9b11da31c</guid>
+<pubDate>Thu, 08 Aug 2024 06:22:16 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始》第四十九期节目。</p><p>没想到昨天晚上录的节目，今天黑神话就发预告了。</p><p>我们游戏开始也是生平第一次赶上了热度，哈哈哈哈哈哈哈。</p><p>由于需要赶热度，这期就没有时间轴了，哈哈哈哈哈哈哈。</p><p>所以大家赶快收听，趁热乎，哈哈哈哈哈…（主播看完黑神话预告片现已疯，请无视他）</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/66b4641832ea61e9b11da31c?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始》第四十九期节目。</p><p>没想到昨天晚上录的节目，今天黑神话就发预告了。</p><p>我们游戏开始也是生平第一次赶上了热度，哈哈哈哈哈哈哈。</p><p>由于需要赶热度，这期就没有时间轴了，哈哈哈哈哈哈哈。</p><p>所以大家赶快收听，趁热乎，哈哈哈哈哈…（主播看完黑神话预告片现已疯，请无视他）</p> ]]>
+</content:encoded>
+<itunes:duration>01:28:42</itunes:duration>
+</item>
+<item>
+<title>Vol.048 玩游戏真的“不务正业”吗？</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/66a85f107349f7a5577ad8ee/media.xyzcdn.net/ltwzsAhuLSZUxgkewMhbRWsaGR6Q.m4a" type="audio/mp4" length="178934133"/>
+<guid isPermaLink="false">66a85f107349f7a5577ad8ee</guid>
+<pubDate>Tue, 30 Jul 2024 03:33:36 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播|Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始 Game Start》第四十八期节目。</p><p>很长一段时间以来，电子游戏因其强大的娱乐性与成瘾性，仿佛在国内总是过街老鼠，人人喊打。</p><p>热爱游戏的游戏玩家，也总是会被冠以“不务正业”的名号，那么游玩电子游戏到底是不是“不务正业”？为什么我们会有玩游戏是不务正业的观点？究竟什么才是正业？</p><p>今天有痣青年EVEN老师，三国霸主冷场王老师，拆迁队长麦壳老师，将与大家精彩分享：</p><p>1、游戏开始两周年啦！(00:19)</p><p>2、君子不戏(06:35)</p><p>3、爱玩游戏是因为基因在作怪(12:01)</p><p>4、游戏一样能让我学到很多东西(27:12)</p><p>5、游戏可以对学习埋下兴趣的种子(40:18)</p><p>6、游戏对我成长道路上三观的塑造很重要(51:02)</p><p>7、游戏是提高我学习成绩的引子(63:50)</p><p>8、三位主播的终极观点(79:34)</p><p>大家觉得玩游戏究竟是不是不务正业呢？欢迎在评论区与我们分享~</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/66a85f107349f7a5577ad8ee?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播|Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始 Game Start》第四十八期节目。</p><p>很长一段时间以来，电子游戏因其强大的娱乐性与成瘾性，仿佛在国内总是过街老鼠，人人喊打。</p><p>热爱游戏的游戏玩家，也总是会被冠以“不务正业”的名号，那么游玩电子游戏到底是不是“不务正业”？为什么我们会有玩游戏是不务正业的观点？究竟什么才是正业？</p><p>今天有痣青年EVEN老师，三国霸主冷场王老师，拆迁队长麦壳老师，将与大家精彩分享：</p><p>1、游戏开始两周年啦！(00:19)</p><p>2、君子不戏(06:35)</p><p>3、爱玩游戏是因为基因在作怪(12:01)</p><p>4、游戏一样能让我学到很多东西(27:12)</p><p>5、游戏可以对学习埋下兴趣的种子(40:18)</p><p>6、游戏对我成长道路上三观的塑造很重要(51:02)</p><p>7、游戏是提高我学习成绩的引子(63:50)</p><p>8、三位主播的终极观点(79:34)</p><p>大家觉得玩游戏究竟是不是不务正业呢？欢迎在评论区与我们分享~</p> ]]>
+</content:encoded>
+<itunes:duration>01:32:41</itunes:duration>
+</item>
+<item>
+<title>Vol.047 优秀、激进、未来可期丨闲聊《绝区零》</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/6693c62437236c546e0d7d3c/media.xyzcdn.net/lsBWW9rlO6ZFMubqnXzGDEvTq_5G.m4a" type="audio/mp4" length="157160781"/>
+<guid isPermaLink="false">6693c62437236c546e0d7d3c</guid>
+<pubDate>Sun, 14 Jul 2024 12:35:48 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播 | Even Ly 交警</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始 Game Start》第四十七期节目~</p><p>最近米哈游的又一款全新作品《绝区零》正式上线，引起全网巨大关注</p><p>熟悉的“米家池子”与“米家养成”，以及略显激进的美术风格与全新的战斗体验，成为了广大玩家讨论的焦点话题</p><p>这款熟悉又有些陌生的米家作品，究竟有着怎样的独特体验，伴随着创新所带来的优缺点又有什么？</p><p>今天三位主播将为大家带来：</p><p>1.本期新嘉宾（01:08）</p><p>2.游戏进度汇报（01:46）</p><p>3.关于《绝区零》的初步感受（05:45）</p><p>4.从“比利”开始聊聊角色设计（18:50）</p><p>5.自由度问题（37:22）</p><p>6.米哈游的“大公司病”（55:08）</p><p>7.重置（Remastered）与重制（Remake）（26:42）</p><p>8.新IP越来越少（34:33）</p><p>9.游戏评判标准中“创作价值”与“商业价值”的比较（52:23）</p><p>10.《绝区零》的16+（79:18）</p><p>11.ui设计问题（89:37）</p><p>12. &nbsp;&nbsp;&nbsp;&nbsp;总结（103:04）</p><p>总之，游戏还是要自己上手体验，才能得出属于自己的结论。另外，希望大家在游戏里百抽百中，十连三金，恭喜发财，生活愉快~</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/6693c62437236c546e0d7d3c?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播 | Even Ly 交警</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始 Game Start》第四十七期节目~</p><p>最近米哈游的又一款全新作品《绝区零》正式上线，引起全网巨大关注</p><p>熟悉的“米家池子”与“米家养成”，以及略显激进的美术风格与全新的战斗体验，成为了广大玩家讨论的焦点话题</p><p>这款熟悉又有些陌生的米家作品，究竟有着怎样的独特体验，伴随着创新所带来的优缺点又有什么？</p><p>今天三位主播将为大家带来：</p><p>1.本期新嘉宾（01:08）</p><p>2.游戏进度汇报（01:46）</p><p>3.关于《绝区零》的初步感受（05:45）</p><p>4.从“比利”开始聊聊角色设计（18:50）</p><p>5.自由度问题（37:22）</p><p>6.米哈游的“大公司病”（55:08）</p><p>7.重置（Remastered）与重制（Remake）（26:42）</p><p>8.新IP越来越少（34:33）</p><p>9.游戏评判标准中“创作价值”与“商业价值”的比较（52:23）</p><p>10.《绝区零》的16+（79:18）</p><p>11.ui设计问题（89:37）</p><p>12. &nbsp;&nbsp;&nbsp;&nbsp;总结（103:04）</p><p>总之，游戏还是要自己上手体验，才能得出属于自己的结论。另外，希望大家在游戏里百抽百中，十连三金，恭喜发财，生活愉快~</p> ]]>
+</content:encoded>
+<itunes:duration>01:48:17</itunes:duration>
+</item>
+<item>
+<title>Vol.046 从《黄金树幽影》看游戏IP的“中年危机”</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/66811de2077b88831b355e94/media.xyzcdn.net/lvE3HYAiyZQHdhXu121x6jiVTFj6.m4a" type="audio/mp4" length="162711967"/>
+<guid isPermaLink="false">66811de2077b88831b355e94</guid>
+<pubDate>Sun, 30 Jun 2024 08:57:06 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播 | Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始 Game Start》第四十六期节目~</p><p>好久不见，甚是想念！</p><p>忙完私事的冷场王和麦壳老师回归啦！</p><p>2024年6月21日，玩家们期待已久的《艾尔登法环》大型DLC——《黄金树幽影》正式推出。</p><p>但是，短短的几天内，黄金树的评价却呈现出“褒贬不一”的状态。</p><p>这究竟是玩家们的期望过高，还是厂商的“摆烂创新”？</p><p>今天三位主播将为大家带来：</p><p>1.Even老师回归“老头环”的感受（00:40）</p><p>2.宫崎英高的阴谋（02:48）</p><p>3.“阴谋”的落空（06:35）</p><p>4.黄金树DLC的数值问题（10:00）</p><p>5.艾尔登法环的“中年危机”（19:34）</p><p>6.老游戏IP的“中年危机”（23:12）</p><p>7.重置（Remastered）与重制（Remake）（26:42）</p><p>8.新IP越来越少（34:33）</p><p>9.游戏评判标准中“创作价值”与“商业价值”的比较（52:23）</p><p>10.IP足够“老”，可以“炒冷饭”（54:58）</p><p>11.“重置游戏”贩卖情怀收割老玩家（64:18）</p><p>12.老玩家究竟会不会为“重置游戏”买单（71:39）</p><p>13.对新游戏新IP、老游戏重置的期望（77:56）</p><p>重置（制）游戏这股风气会一直持续下去吗？我们无从预测。但是我们仍然期待厂商们能在“创作性”与“商业性”中找到新的方向，让游戏玩家们再次迎来一个百花齐放的时代~</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/66811de2077b88831b355e94?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播 | Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始 Game Start》第四十六期节目~</p><p>好久不见，甚是想念！</p><p>忙完私事的冷场王和麦壳老师回归啦！</p><p>2024年6月21日，玩家们期待已久的《艾尔登法环》大型DLC——《黄金树幽影》正式推出。</p><p>但是，短短的几天内，黄金树的评价却呈现出“褒贬不一”的状态。</p><p>这究竟是玩家们的期望过高，还是厂商的“摆烂创新”？</p><p>今天三位主播将为大家带来：</p><p>1.Even老师回归“老头环”的感受（00:40）</p><p>2.宫崎英高的阴谋（02:48）</p><p>3.“阴谋”的落空（06:35）</p><p>4.黄金树DLC的数值问题（10:00）</p><p>5.艾尔登法环的“中年危机”（19:34）</p><p>6.老游戏IP的“中年危机”（23:12）</p><p>7.重置（Remastered）与重制（Remake）（26:42）</p><p>8.新IP越来越少（34:33）</p><p>9.游戏评判标准中“创作价值”与“商业价值”的比较（52:23）</p><p>10.IP足够“老”，可以“炒冷饭”（54:58）</p><p>11.“重置游戏”贩卖情怀收割老玩家（64:18）</p><p>12.老玩家究竟会不会为“重置游戏”买单（71:39）</p><p>13.对新游戏新IP、老游戏重置的期望（77:56）</p><p>重置（制）游戏这股风气会一直持续下去吗？我们无从预测。但是我们仍然期待厂商们能在“创作性”与“商业性”中找到新的方向，让游戏玩家们再次迎来一个百花齐放的时代~</p> ]]>
+</content:encoded>
+<itunes:duration>01:24:15</itunes:duration>
+</item>
+<item>
+<title>Vol.045 射击游戏的关卡奥秘—Dust2篇</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/666fd229c26e396a36551feb/media.xyzcdn.net/lluZ7HZoUHDjDOKa2hj9n-9__uNv.m4a" type="audio/mp4" length="121701811"/>
+<guid isPermaLink="false">666fd229c26e396a36551feb</guid>
+<pubDate>Mon, 17 Jun 2024 06:05:29 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播 | Even</p><p>嘉宾丨小A</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始 Game Start》第四十五期节目。</p><p>如果你熟悉射击类游戏，那么你一定知道爆破模式中那张永恒的经典“Dust2”，在某些游戏中，也叫“沙漠灰”。</p><p>简约而不简单的构造，极佳的平衡性，以及在这张地图上诞生的无数名场面，都让它深深地铭刻在每个玩家关于“射击”的记忆之中。</p><p>究其根本，是什么让“dust2”成为了一张经久不衰的王道爆破地图，从它的设计中，我们能学到哪些关于射击游戏的设计思路？</p><p>今天就让马枪鬼才Even与嘉宾小A和大家一起聊聊：</p><p>1.开场（00:53）</p><p>2.本期选题由来（08:45）</p><p>3.爆破模式的“五大区域”（20:28）</p><p>4.地图大小、2D、白盒阶段（28 :44）</p><p>5.角色与标准尺寸（36:37）</p><p>6.角色与标准尺寸（36:37）</p><p>7.地图主题（42:45）</p><p>8.地图平衡性（49:41）</p><p>9.投掷物点位与“涌现式设计 ”（56:11）</p><p>10.QA环节（59:54）</p><p>11.尾声（80：46）</p><p>再次感谢小A老师来到节目，为大家带来如此多的干货，那么就让我们一起期待之后关卡设计“大地图”篇吧~</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/666fd229c26e396a36551feb?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播 | Even</p><p>嘉宾丨小A</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始 Game Start》第四十五期节目。</p><p>如果你熟悉射击类游戏，那么你一定知道爆破模式中那张永恒的经典“Dust2”，在某些游戏中，也叫“沙漠灰”。</p><p>简约而不简单的构造，极佳的平衡性，以及在这张地图上诞生的无数名场面，都让它深深地铭刻在每个玩家关于“射击”的记忆之中。</p><p>究其根本，是什么让“dust2”成为了一张经久不衰的王道爆破地图，从它的设计中，我们能学到哪些关于射击游戏的设计思路？</p><p>今天就让马枪鬼才Even与嘉宾小A和大家一起聊聊：</p><p>1.开场（00:53）</p><p>2.本期选题由来（08:45）</p><p>3.爆破模式的“五大区域”（20:28）</p><p>4.地图大小、2D、白盒阶段（28 :44）</p><p>5.角色与标准尺寸（36:37）</p><p>6.角色与标准尺寸（36:37）</p><p>7.地图主题（42:45）</p><p>8.地图平衡性（49:41）</p><p>9.投掷物点位与“涌现式设计 ”（56:11）</p><p>10.QA环节（59:54）</p><p>11.尾声（80：46）</p><p>再次感谢小A老师来到节目，为大家带来如此多的干货，那么就让我们一起期待之后关卡设计“大地图”篇吧~</p> ]]>
+</content:encoded>
+<itunes:duration>01:23:54</itunes:duration>
+</item>
+<item>
+<title>Vol.044 那些伴我成长的游戏社区</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/6655adf806bc73decbfa717c/media.xyzcdn.net/lpLgZdmX9ZuJ1VwH1xmW4lG3nwGk.m4a" type="audio/mp4" length="171201665"/>
+<guid isPermaLink="false">6655adf806bc73decbfa717c</guid>
+<pubDate>Tue, 28 May 2024 10:12:08 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播 | Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始 Game Start》第四十四期节目。</p><p>从熟人社交到网络论坛，“游戏社区”一直在以不同的形式，陪伴着我们的游戏人生</p><p>随着时间的推移，有些游戏社区早已消失在我们的视野中，而又有一部分社区，伴随着技术的发展与社区文化的更迭，逐渐蓬勃发展，走向主流。</p><p>那些陪伴过我们的游戏社区，究竟由何而起，又因何落寞？</p><p>今天硬核攻略人Even，精英喷子冷场王，纸媒死忠麦壳，将为大家盘点：</p><p>1.主播近期状态（01:07）</p><p>2.本期选题由来（04:17）</p><p>3.熟人游戏社区（05:19）</p><p>4.纸媒游戏社区（17:44）</p><p>5.互联网游戏社区（32:05）</p><p>6.优质内容社区（44:12）</p><p>7.游戏官方社区（63:05）</p><p>8.对未来游戏社区形态的猜想（66:13）</p><p>9.冷场王的个人经历（84:36）</p><p>10.麦壳的个人经历（95:26）</p><p>11.尾声（112：02）</p><p>不管怎样，希望大家都可以健健康康，快快乐乐地度过每一天，如果节目能带给你一点快乐，那就是我们最大的心愿！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/6655adf806bc73decbfa717c?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播 | Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始 Game Start》第四十四期节目。</p><p>从熟人社交到网络论坛，“游戏社区”一直在以不同的形式，陪伴着我们的游戏人生</p><p>随着时间的推移，有些游戏社区早已消失在我们的视野中，而又有一部分社区，伴随着技术的发展与社区文化的更迭，逐渐蓬勃发展，走向主流。</p><p>那些陪伴过我们的游戏社区，究竟由何而起，又因何落寞？</p><p>今天硬核攻略人Even，精英喷子冷场王，纸媒死忠麦壳，将为大家盘点：</p><p>1.主播近期状态（01:07）</p><p>2.本期选题由来（04:17）</p><p>3.熟人游戏社区（05:19）</p><p>4.纸媒游戏社区（17:44）</p><p>5.互联网游戏社区（32:05）</p><p>6.优质内容社区（44:12）</p><p>7.游戏官方社区（63:05）</p><p>8.对未来游戏社区形态的猜想（66:13）</p><p>9.冷场王的个人经历（84:36）</p><p>10.麦壳的个人经历（95:26）</p><p>11.尾声（112：02）</p><p>不管怎样，希望大家都可以健健康康，快快乐乐地度过每一天，如果节目能带给你一点快乐，那就是我们最大的心愿！</p> ]]>
+</content:encoded>
+<itunes:duration>01:57:57</itunes:duration>
+</item>
+<item>
+<title>vol.043 从游戏劳模看职场老实人丨五一特别篇</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/662fadae4858131450532ded/media.xyzcdn.net/lrmy4ZVO4kAozqxZfPbozyGv-575.m4a" type="audio/mp4" length="246341138"/>
+<guid isPermaLink="false">662fadae4858131450532ded</guid>
+<pubDate>Mon, 29 Apr 2024 14:24:46 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播 | Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始 Game Start》第四十三期节目。</p><p>五一国际劳动节，是工人阶级奋斗争取来的、世界上80多个国家的全国性节日，是全世界劳动人民团结战斗的节日。</p><p>2024年五一，是第74个中国劳动节，也是第134个国际劳动节。</p><p>放假前夕，恰逢节目更新。我们在整理“游戏里的劳模”时，突然发现，这些“劳模”颇有“职场老实人”的特质。</p><p>今天火龙猎手Even，BMW死忠冷场王，鸽子毁灭者麦壳，将为大家盘点：</p><p>1.脑洞大开的选题（00:17）</p><p>2.米哈游的“紫衣劳模”（03:21）</p><p>3.怪物猎人 火龙（06:50）</p><p>4.星际争霸 泽拉图（29:48）</p><p>5.以麦壳老师为典型代表的RPG支线清道夫（38:33）</p><p>6.宝可梦系列 大师球（46:37）</p><p>7.极品飞车 BMW M3 E46 GTR（58:36）</p><p>8.只狼 苇名弦一郎（74:23）</p><p>9.“门”（89:43）</p><p>10.射击游戏 AK47（103:39）</p><p>11.原神 蒙德城 鸽子（117:35）</p><p>吐槽归吐槽，打工还得继续，毕竟我们是社会主义接班人嘛！祝大家在工作学习中顺风顺水，五一假期玩得开心！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/662fadae4858131450532ded?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播 | Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始 Game Start》第四十三期节目。</p><p>五一国际劳动节，是工人阶级奋斗争取来的、世界上80多个国家的全国性节日，是全世界劳动人民团结战斗的节日。</p><p>2024年五一，是第74个中国劳动节，也是第134个国际劳动节。</p><p>放假前夕，恰逢节目更新。我们在整理“游戏里的劳模”时，突然发现，这些“劳模”颇有“职场老实人”的特质。</p><p>今天火龙猎手Even，BMW死忠冷场王，鸽子毁灭者麦壳，将为大家盘点：</p><p>1.脑洞大开的选题（00:17）</p><p>2.米哈游的“紫衣劳模”（03:21）</p><p>3.怪物猎人 火龙（06:50）</p><p>4.星际争霸 泽拉图（29:48）</p><p>5.以麦壳老师为典型代表的RPG支线清道夫（38:33）</p><p>6.宝可梦系列 大师球（46:37）</p><p>7.极品飞车 BMW M3 E46 GTR（58:36）</p><p>8.只狼 苇名弦一郎（74:23）</p><p>9.“门”（89:43）</p><p>10.射击游戏 AK47（103:39）</p><p>11.原神 蒙德城 鸽子（117:35）</p><p>吐槽归吐槽，打工还得继续，毕竟我们是社会主义接班人嘛！祝大家在工作学习中顺风顺水，五一假期玩得开心！</p> ]]>
+</content:encoded>
+<itunes:duration>02:07:33</itunes:duration>
+</item>
+<item>
+<title>Vol.042 游戏与电影系列之游戏改编电影</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/661de80848c40e2fb094f2f5/media.xyzcdn.net/lnJiZR4-Nnnu6_8oRrU0y90nSf7F.m4a" type="audio/mp4" length="277151299"/>
+<guid isPermaLink="false">661de80848c40e2fb094f2f5</guid>
+<pubDate>Tue, 16 Apr 2024 02:52:56 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始Game Start》第四十二期节目。</p><p>我们曾在游戏开始的第36期给大家带来过游戏与电影系列的第一期节目《媒介战争》。在那一期中我们主要介绍了游戏与电影的定义，它们之间的相同点与不同点，游戏的电影化趋势以及电影的游戏化趋势。</p><p>今天我们将继续给各位听众朋友们带来系列节目的第二期《游戏与电影系列之游戏改编电影》，我们将给大家详细介绍一下游戏改编电影都有哪些类型？它们的市场表现及口碑如何？游戏改编电影的困境在哪里？什么样的电影是理想的游戏改编电影？</p><p>本期节目您将听到：</p><p>1、前言(00:19)</p><p>2、最终幻想系列(04:12)</p><p>3、魔兽(26:39)</p><p>4、愤怒的小鸟(31:15)</p><p>5、勇者斗恶龙(34:16)</p><p>6、马里奥兄弟大冒险(36:56)</p><p>7、生化危机系列(42:55)</p><p>8、寂静岭(52:42)</p><p>9、爬墙四大金刚：古墓丽影系列、神秘海域、刺客信条、波斯王子(55:30)</p><p>10、真三国无双(82:28)</p><p>11、大侦探皮卡丘(88:34)</p><p>12、刺猬索尼克系列(91:32)</p><p>13、GT赛车(93:51)</p><p>14、俄罗斯方块(96:32)</p><p>15、意想不到的改编：逆转裁判、动物之森、雷顿教授(105:30)</p><p>16、游戏改编电影的困境(111:59)</p><p>17、理想中的游戏改编电影是怎么样？(120:00)</p><p>听众朋友们都喜欢哪些游戏改编电影呢？欢迎留言与我们讨论~</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/661de80848c40e2fb094f2f5?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始Game Start》第四十二期节目。</p><p>我们曾在游戏开始的第36期给大家带来过游戏与电影系列的第一期节目《媒介战争》。在那一期中我们主要介绍了游戏与电影的定义，它们之间的相同点与不同点，游戏的电影化趋势以及电影的游戏化趋势。</p><p>今天我们将继续给各位听众朋友们带来系列节目的第二期《游戏与电影系列之游戏改编电影》，我们将给大家详细介绍一下游戏改编电影都有哪些类型？它们的市场表现及口碑如何？游戏改编电影的困境在哪里？什么样的电影是理想的游戏改编电影？</p><p>本期节目您将听到：</p><p>1、前言(00:19)</p><p>2、最终幻想系列(04:12)</p><p>3、魔兽(26:39)</p><p>4、愤怒的小鸟(31:15)</p><p>5、勇者斗恶龙(34:16)</p><p>6、马里奥兄弟大冒险(36:56)</p><p>7、生化危机系列(42:55)</p><p>8、寂静岭(52:42)</p><p>9、爬墙四大金刚：古墓丽影系列、神秘海域、刺客信条、波斯王子(55:30)</p><p>10、真三国无双(82:28)</p><p>11、大侦探皮卡丘(88:34)</p><p>12、刺猬索尼克系列(91:32)</p><p>13、GT赛车(93:51)</p><p>14、俄罗斯方块(96:32)</p><p>15、意想不到的改编：逆转裁判、动物之森、雷顿教授(105:30)</p><p>16、游戏改编电影的困境(111:59)</p><p>17、理想中的游戏改编电影是怎么样？(120:00)</p><p>听众朋友们都喜欢哪些游戏改编电影呢？欢迎留言与我们讨论~</p> ]]>
+</content:encoded>
+<itunes:duration>02:23:34</itunes:duration>
+</item>
+<item>
+<title>Vol.041 人类，很幸运丨《来自星尘》故事会</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/65f84cc7696bd9a879f1b02c/media.xyzcdn.net/lgRWMVOs1OClUS8w-LIHyEMzwOzL.m4a" type="audio/mp4" length="199638685"/>
+<guid isPermaLink="false">65f84cc7696bd9a879f1b02c</guid>
+<pubDate>Mon, 18 Mar 2024 14:16:38 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播 | Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始 Game Start》第四十一期节目。</p><p>近日，单机买断制二次元手游《来自星尘》在网络上激起了网友们广泛的讨论。其糟糕的新手引导，质量低下的建模水平与渲染，以及经典的“谜语人”式文案与演出，引来了无数玩家们的声讨与谩骂。</p><p>然而，在主播通关游戏，并认真阅读每一处文案后，发现《来自星尘》的游戏剧情如果翻译成人话来讲述，却不失为一部佳作，新颖的世界观设定也颇值得玩味。</p><p>本期节目，就由史里看花者even，仙剑执剑人冷场王，有色眼镜侠麦壳为大家精彩讲述：</p><p>1、前言（00:27）</p><p>2、星尘往事（07:48）</p><p>3、风信之死（58:40）</p><p>4、日风港风波（66:55）</p><p>5、决战夏塔拉（97:31）</p><p>6、莱拉的循环（105:24）</p><p>7、 &nbsp;想说的话（122:01）</p><p>8、 &nbsp;尾声（133:27）</p><p>喷归喷，骂归骂，希望我们在批判的浪潮中，也能注意到本就存在的小小闪光点，也希望制作组能够正视问题，知错就改，在未来能制作出不负众望，脚踏实地的优秀作品。</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/65f84cc7696bd9a879f1b02c?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播 | Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始 Game Start》第四十一期节目。</p><p>近日，单机买断制二次元手游《来自星尘》在网络上激起了网友们广泛的讨论。其糟糕的新手引导，质量低下的建模水平与渲染，以及经典的“谜语人”式文案与演出，引来了无数玩家们的声讨与谩骂。</p><p>然而，在主播通关游戏，并认真阅读每一处文案后，发现《来自星尘》的游戏剧情如果翻译成人话来讲述，却不失为一部佳作，新颖的世界观设定也颇值得玩味。</p><p>本期节目，就由史里看花者even，仙剑执剑人冷场王，有色眼镜侠麦壳为大家精彩讲述：</p><p>1、前言（00:27）</p><p>2、星尘往事（07:48）</p><p>3、风信之死（58:40）</p><p>4、日风港风波（66:55）</p><p>5、决战夏塔拉（97:31）</p><p>6、莱拉的循环（105:24）</p><p>7、 &nbsp;想说的话（122:01）</p><p>8、 &nbsp;尾声（133:27）</p><p>喷归喷，骂归骂，希望我们在批判的浪潮中，也能注意到本就存在的小小闪光点，也希望制作组能够正视问题，知错就改，在未来能制作出不负众望，脚踏实地的优秀作品。</p> ]]>
+</content:encoded>
+<itunes:duration>02:17:33</itunes:duration>
+</item>
+<item>
+<title>Vol.040 只会缝，不创新？对谈一线游戏策划</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/65e44e6e9bf20df4c89e1cc5/media.xyzcdn.net/lm_E0om1_RkTkrMsntZcL4RzvCmZ.m4a" type="audio/mp4" length="193720585"/>
+<guid isPermaLink="false">65e44e6e9bf20df4c89e1cc5</guid>
+<pubDate>Sun, 03 Mar 2024 23:00:00 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播 | Even 冷场王 麦壳</p><p>嘉宾｜小A</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始 Game Start》第四十期节目。</p><p>如果把一部游戏比做一个人的话，程序是这个人的骨骼，美术是这个人的皮肤，而游戏策划则是这个人的心灵或灵魂。</p><p>本期节目我们很荣幸地邀请到了国内游戏行业的一线策划小A老师。</p><p>作为一名在游戏行业深耕多年的一线游戏策划，小A老师参与过多个国内知名游戏项目的研发，积累了许多行业经验，对行业有着深刻地观察与理解。</p><p>游戏行业一直都是国内各行各业中最为高速发展且不断变化的行业之一。游戏开始的听友们也对高速运转的游戏行业提出了一些问题，小A老师今天将与大家畅所欲言，回答听友们最为关心，有关游戏研发、游戏策划、游戏行业的诸多相关问题：</p><p>1、嘉宾介绍（00:14）</p><p>2、游戏策划会不会35岁被优化？（03:16）</p><p>3、在策划一个游戏之前，要做哪些准备？对哪些方面的内容临行调查研究， 以确定可以做出一款能被玩家接受和喜爱的游戏？（14:08）</p><p>4、游戏研发中的优先级该如何安排？如果策划与开发产生分歧该如何调节？（21:59）</p><p>5、游戏研发最高能到什么岗位？（35:35）</p><p>6、如何探寻游戏的创新性？像Apple Vision Pro等VR眼镜的硬件发展，如何提高VR和AR游戏交互性？是否会是未来游戏的发展趋势？（41:10）</p><p>7、 制作周期久成本高的3A项目，在中国真的会赔钱吗？（58:26）</p><p>8、目前AI是否对游戏研发产生了实质影响？（1:05:23）</p><p>9、如何看待游戏策划实际上手打不过玩家？（1:11:18）</p><p>10、如果想往游戏行业发展，大学毕业后应该去国内大厂打工还是去欧日美打工？（1:22:24）</p><p>11、游戏更新最快能几天更新新版本？ （1:30:49）</p><p>12、尾声（1:35:38）</p><p>注：本期节目嘉宾观点谨代表特殊环境及个人立场</p><p>本期节目干货满满！如果听众朋友们喜欢本期节目的话希望大家能够多多转发分享，如果对游戏行业还有其他问题，也可以在评论区与我们留言讨论，谢谢大家！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/65e44e6e9bf20df4c89e1cc5?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播 | Even 冷场王 麦壳</p><p>嘉宾｜小A</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始 Game Start》第四十期节目。</p><p>如果把一部游戏比做一个人的话，程序是这个人的骨骼，美术是这个人的皮肤，而游戏策划则是这个人的心灵或灵魂。</p><p>本期节目我们很荣幸地邀请到了国内游戏行业的一线策划小A老师。</p><p>作为一名在游戏行业深耕多年的一线游戏策划，小A老师参与过多个国内知名游戏项目的研发，积累了许多行业经验，对行业有着深刻地观察与理解。</p><p>游戏行业一直都是国内各行各业中最为高速发展且不断变化的行业之一。游戏开始的听友们也对高速运转的游戏行业提出了一些问题，小A老师今天将与大家畅所欲言，回答听友们最为关心，有关游戏研发、游戏策划、游戏行业的诸多相关问题：</p><p>1、嘉宾介绍（00:14）</p><p>2、游戏策划会不会35岁被优化？（03:16）</p><p>3、在策划一个游戏之前，要做哪些准备？对哪些方面的内容临行调查研究， 以确定可以做出一款能被玩家接受和喜爱的游戏？（14:08）</p><p>4、游戏研发中的优先级该如何安排？如果策划与开发产生分歧该如何调节？（21:59）</p><p>5、游戏研发最高能到什么岗位？（35:35）</p><p>6、如何探寻游戏的创新性？像Apple Vision Pro等VR眼镜的硬件发展，如何提高VR和AR游戏交互性？是否会是未来游戏的发展趋势？（41:10）</p><p>7、 制作周期久成本高的3A项目，在中国真的会赔钱吗？（58:26）</p><p>8、目前AI是否对游戏研发产生了实质影响？（1:05:23）</p><p>9、如何看待游戏策划实际上手打不过玩家？（1:11:18）</p><p>10、如果想往游戏行业发展，大学毕业后应该去国内大厂打工还是去欧日美打工？（1:22:24）</p><p>11、游戏更新最快能几天更新新版本？ （1:30:49）</p><p>12、尾声（1:35:38）</p><p>注：本期节目嘉宾观点谨代表特殊环境及个人立场</p><p>本期节目干货满满！如果听众朋友们喜欢本期节目的话希望大家能够多多转发分享，如果对游戏行业还有其他问题，也可以在评论区与我们留言讨论，谢谢大家！</p> ]]>
+</content:encoded>
+<itunes:duration>01:40:21</itunes:duration>
+</item>
+<item>
+<title>Vol.039 老头环，启动！“魂”系列游戏大型安利现场</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/65d8533e513a776b579c97f0/media.xyzcdn.net/liL0-k5vgo0mX8I2LQvdZ878ZVo8.m4a" type="audio/mp4" length="147390079"/>
+<guid isPermaLink="false">65d8533e513a776b579c97f0</guid>
+<pubDate>Fri, 23 Feb 2024 08:11:41 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播 | Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始 Game Start》第三十九期节目。</p><p>新年伊始，宫崎英高就为各位玩家放出一记猛料——艾尔登法环资料片《黄金树之影》预告，它的发布，也代表着法环DLC这颗卫星的正式落地，相信各位魂系爱好者，此刻已经坐立难安了吧。</p><p>为何顶着“高难”的旗号，魂系列却依然能吸引大量玩家入坑，并连续拿下两座TGA年度游戏的奖杯？FromSoftware又是怎样通过合理的设计，让玩家在一次次的死亡中如痴如醉？</p><p>今天，三位主播就接着《黄金树之影》的公布，与大家畅聊：</p><p>1、过年回顾（00:45）</p><p>2、魂系游戏大安利（14:25）</p><p>3、从《怪物猎人》到《黑暗之魂》（28:16）</p><p>4、冷场王老师特别访谈：能开光大师剑，却不能玩魂？（50：46）</p><p>5、 “魂”系列的剧情风格（72：18）</p><p>6、 &nbsp;新手从哪一部入坑？（85：28）</p><p>新年新气象，《游戏开始》在这里祝大家开年大吉，心想事成，身体健康，喜气洋洋！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/65d8533e513a776b579c97f0?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播 | Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始 Game Start》第三十九期节目。</p><p>新年伊始，宫崎英高就为各位玩家放出一记猛料——艾尔登法环资料片《黄金树之影》预告，它的发布，也代表着法环DLC这颗卫星的正式落地，相信各位魂系爱好者，此刻已经坐立难安了吧。</p><p>为何顶着“高难”的旗号，魂系列却依然能吸引大量玩家入坑，并连续拿下两座TGA年度游戏的奖杯？FromSoftware又是怎样通过合理的设计，让玩家在一次次的死亡中如痴如醉？</p><p>今天，三位主播就接着《黄金树之影》的公布，与大家畅聊：</p><p>1、过年回顾（00:45）</p><p>2、魂系游戏大安利（14:25）</p><p>3、从《怪物猎人》到《黑暗之魂》（28:16）</p><p>4、冷场王老师特别访谈：能开光大师剑，却不能玩魂？（50：46）</p><p>5、 “魂”系列的剧情风格（72：18）</p><p>6、 &nbsp;新手从哪一部入坑？（85：28）</p><p>新年新气象，《游戏开始》在这里祝大家开年大吉，心想事成，身体健康，喜气洋洋！</p> ]]>
+</content:encoded>
+<itunes:duration>01:41:37</itunes:duration>
+</item>
+<item>
+<title>Vol.038 你不缝有的是帕鲁缝丨过年游戏大推荐</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/65c1e7f60847349e0c011c9b/media.xyzcdn.net/lsD4dADfXnnIXZw17ECUphzl4JtL.m4a" type="audio/mp4" length="257493851"/>
+<guid isPermaLink="false">65c1e7f60847349e0c011c9b</guid>
+<pubDate>Tue, 06 Feb 2024 08:04:05 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播 | Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始 Game Start》第三十八期节目。</p><p>时间如白驹过隙，再过几天，我们就将迎来2024甲辰龙年。</p><p>过年期间，想必大家已经安排满满了吧。</p><p>这个春节假期，各位听众是打算去走街串巷、找老友叙旧，还是宅家游戏，独享来之不易的假期？</p><p>下棋扑克麻将春节传统老三样，你是否已经感觉到乏味？</p><p>今天行走的游戏库Even，old school玩家冷场王，夕夕大地主麦壳，将为大家带来一些新花样：</p><p>1、给大家拜个早年及为什么要做这期节目（00:30）</p><p>2、我们是如何划分推荐维度的（04:32）</p><p>3、幻兽帕鲁之初见（09:32）</p><p>4、幻兽帕鲁这只缝合怪到底好在哪（17:07）</p><p>5、Even老师的游戏推荐</p><p>有时间没条件：《卡卡布三部曲》（37:30），《王国之泪》和《怪物猎人 曙光》（50:49）</p><p>没时间没条件：《原神》《崩坏 星穹铁道》（54:44）《使命召唤手游》《派对之星》（55:22）</p><p>没时间有条件：《战神DLC》（57:20）</p><p>有时间有条件：《博德之门3》（59:01）《疑案追声》（60:13）《极乐迪斯科》（64:07）</p><p>6、冷场王老师的游戏推荐</p><p>有时间没条件：《baba is you》（69:36）</p><p>没时间没条件：《植物大战僵尸》（73:37）</p><p>有时间有条件：《逆转裁判》《幽灵诡计》（80:04）</p><p>没时间有条件：《马里奥聚会》《12switch》（90:26）</p><p>7、麦壳老师的游戏推荐</p><p>没时间没条件：《拼夕夕斗地主》（97:04）</p><p>有时间没条件：《原神》《崩坏 星穹铁道》《明日方舟》（103:53）掌机模拟器《空之轨迹系列》《战神PSP系列》（107:32）</p><p>没时间有条件：《幻兽帕鲁》（113:01）</p><p>有时间有条件：《只狼》（114:46）</p><p>8、总结，对帕鲁、AI创作及打工人的思考（123:34）</p><p>不知不觉，《游戏开始 Game Start》又与大家走过了一年。感谢各位朋友的收听与支持~祝大家春节快乐龙行龘龘！我们明年再见！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/65c1e7f60847349e0c011c9b?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播 | Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始 Game Start》第三十八期节目。</p><p>时间如白驹过隙，再过几天，我们就将迎来2024甲辰龙年。</p><p>过年期间，想必大家已经安排满满了吧。</p><p>这个春节假期，各位听众是打算去走街串巷、找老友叙旧，还是宅家游戏，独享来之不易的假期？</p><p>下棋扑克麻将春节传统老三样，你是否已经感觉到乏味？</p><p>今天行走的游戏库Even，old school玩家冷场王，夕夕大地主麦壳，将为大家带来一些新花样：</p><p>1、给大家拜个早年及为什么要做这期节目（00:30）</p><p>2、我们是如何划分推荐维度的（04:32）</p><p>3、幻兽帕鲁之初见（09:32）</p><p>4、幻兽帕鲁这只缝合怪到底好在哪（17:07）</p><p>5、Even老师的游戏推荐</p><p>有时间没条件：《卡卡布三部曲》（37:30），《王国之泪》和《怪物猎人 曙光》（50:49）</p><p>没时间没条件：《原神》《崩坏 星穹铁道》（54:44）《使命召唤手游》《派对之星》（55:22）</p><p>没时间有条件：《战神DLC》（57:20）</p><p>有时间有条件：《博德之门3》（59:01）《疑案追声》（60:13）《极乐迪斯科》（64:07）</p><p>6、冷场王老师的游戏推荐</p><p>有时间没条件：《baba is you》（69:36）</p><p>没时间没条件：《植物大战僵尸》（73:37）</p><p>有时间有条件：《逆转裁判》《幽灵诡计》（80:04）</p><p>没时间有条件：《马里奥聚会》《12switch》（90:26）</p><p>7、麦壳老师的游戏推荐</p><p>没时间没条件：《拼夕夕斗地主》（97:04）</p><p>有时间没条件：《原神》《崩坏 星穹铁道》《明日方舟》（103:53）掌机模拟器《空之轨迹系列》《战神PSP系列》（107:32）</p><p>没时间有条件：《幻兽帕鲁》（113:01）</p><p>有时间有条件：《只狼》（114:46）</p><p>8、总结，对帕鲁、AI创作及打工人的思考（123:34）</p><p>不知不觉，《游戏开始 Game Start》又与大家走过了一年。感谢各位朋友的收听与支持~祝大家春节快乐龙行龘龘！我们明年再见！</p> ]]>
+</content:encoded>
+<itunes:duration>02:13:19</itunes:duration>
+</item>
+<item>
+<title>Vol.037 完蛋！我的年度游戏是王者荣耀！</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/65af6ba716860d3ef1971e8a/media.xyzcdn.net/lv7nLH_bDhqjXcl0IyN8GIl4NT2P.m4a" type="audio/mp4" length="209639531"/>
+<guid isPermaLink="false">65af6ba716860d3ef1971e8a</guid>
+<pubDate>Tue, 23 Jan 2024 07:32:55 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播 | Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始 Game Start》第三十七期节目。</p><p>2022年的游戏市场可谓是万马齐喑。</p><p>时隔一年，2023年的电子游戏界则堪称诸神之战。那些眼熟的不眼熟的、知名的不知名的作品，纷纷闪亮登场。</p><p>2023年12月8日，2023年TGA获奖游戏名单发布。它们有的技惊四座，有的独冠群雄，也有的饮恨而归。《博德之门3》成为全场最大的赢家，共计拿到包括年度最佳游戏在内的5项大奖。</p><p>让我们把视线拉回这里。三位主播对于2023年的游戏有什么想法，他们又在2023年玩了什么游戏？他们各自心中的年度游戏又是什么？</p><p>今天王者战神Even，键政学家冷场王，米家拥趸麦壳，将与大家精彩分享：</p><p>1、2023年游戏大作的共性一：热度持续短（05:02）</p><p>2、2023年游戏大作的共性二：大多是续作（10:13）</p><p>3、对于几个新老IP的看法</p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;卧龙（12:08）星空（17:02）原子之心（20:43）博德之门（22:21）最终幻想（25:19）小岛秀夫（34:23）恐怖游戏（38:30）原神（46:37）</p><p>4、EVEN老师的年度游戏（58:55）</p><p>5、冷场王老师的年度游戏（73:43）</p><p>6、麦壳老师的年度游戏（87:16）</p><p>7、总结（101:54）</p><p>听众朋友们对于今年的TGA奖项提名有哪些看法呢？你们心目中的年度游戏又是什么呢？欢迎在评论区与我们留言分享~</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/65af6ba716860d3ef1971e8a?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播 | Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始 Game Start》第三十七期节目。</p><p>2022年的游戏市场可谓是万马齐喑。</p><p>时隔一年，2023年的电子游戏界则堪称诸神之战。那些眼熟的不眼熟的、知名的不知名的作品，纷纷闪亮登场。</p><p>2023年12月8日，2023年TGA获奖游戏名单发布。它们有的技惊四座，有的独冠群雄，也有的饮恨而归。《博德之门3》成为全场最大的赢家，共计拿到包括年度最佳游戏在内的5项大奖。</p><p>让我们把视线拉回这里。三位主播对于2023年的游戏有什么想法，他们又在2023年玩了什么游戏？他们各自心中的年度游戏又是什么？</p><p>今天王者战神Even，键政学家冷场王，米家拥趸麦壳，将与大家精彩分享：</p><p>1、2023年游戏大作的共性一：热度持续短（05:02）</p><p>2、2023年游戏大作的共性二：大多是续作（10:13）</p><p>3、对于几个新老IP的看法</p><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;卧龙（12:08）星空（17:02）原子之心（20:43）博德之门（22:21）最终幻想（25:19）小岛秀夫（34:23）恐怖游戏（38:30）原神（46:37）</p><p>4、EVEN老师的年度游戏（58:55）</p><p>5、冷场王老师的年度游戏（73:43）</p><p>6、麦壳老师的年度游戏（87:16）</p><p>7、总结（101:54）</p><p>听众朋友们对于今年的TGA奖项提名有哪些看法呢？你们心目中的年度游戏又是什么呢？欢迎在评论区与我们留言分享~</p> ]]>
+</content:encoded>
+<itunes:duration>01:48:32</itunes:duration>
+</item>
+<item>
+<title>Vol.036 游戏与电影系列之媒介战争</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/659cb887096f477b3ef7e895/media.xyzcdn.net/lhV69jo3TTbe0kQlBSX1l6qwS9S-.m4a" type="audio/mp4" length="236211556"/>
+<guid isPermaLink="false">659cb887096f477b3ef7e895</guid>
+<pubDate>Tue, 09 Jan 2024 03:07:51 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播 | Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始 Game Start》第三十六期节目。</p><p>很多人都爱说电影是造梦的工具，那么游戏又何尝不是呢？</p><p>游戏与电影作为二十一世纪最为流行且被大众所熟知的两大媒介，它们之间有着太多太多共同点与相同的受众。</p><p>但游戏与电影作为两个完全不同的媒介形式，却总是能相互影响，相互交融。近些年游戏的电影化趋势与电影的游戏化趋势也愈发明显。</p><p>那么这俩媒介之间究竟有着哪些相同点与不同点？它们之间的战争是如何进行的？未来又会有着怎样的发展趋势呢？</p><p>今天捧哏人Even，吐槽人冷场王，挖坑人麦壳将与大家精彩分享：</p><p>1、介绍这个系列节目的内容（00:12）</p><p>2、什么是媒介战争？（06:26）</p><p>3、游戏与电影的定义（26:31）</p><p>4、游戏与电影的相同点（45:38）</p><p>5、游戏与电影的不同点（70:12）</p><p>6、游戏的电影化趋势（93:55）</p><p>7、电影的游戏化趋势（100:48）</p><p>8、总结（111:12）</p><p>听众朋友们对于游戏与电影都有哪些自己的理解与看法呢？欢迎在评论区与我们留言分享~</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/659cb887096f477b3ef7e895?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播 | Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始 Game Start》第三十六期节目。</p><p>很多人都爱说电影是造梦的工具，那么游戏又何尝不是呢？</p><p>游戏与电影作为二十一世纪最为流行且被大众所熟知的两大媒介，它们之间有着太多太多共同点与相同的受众。</p><p>但游戏与电影作为两个完全不同的媒介形式，却总是能相互影响，相互交融。近些年游戏的电影化趋势与电影的游戏化趋势也愈发明显。</p><p>那么这俩媒介之间究竟有着哪些相同点与不同点？它们之间的战争是如何进行的？未来又会有着怎样的发展趋势呢？</p><p>今天捧哏人Even，吐槽人冷场王，挖坑人麦壳将与大家精彩分享：</p><p>1、介绍这个系列节目的内容（00:12）</p><p>2、什么是媒介战争？（06:26）</p><p>3、游戏与电影的定义（26:31）</p><p>4、游戏与电影的相同点（45:38）</p><p>5、游戏与电影的不同点（70:12）</p><p>6、游戏的电影化趋势（93:55）</p><p>7、电影的游戏化趋势（100:48）</p><p>8、总结（111:12）</p><p>听众朋友们对于游戏与电影都有哪些自己的理解与看法呢？欢迎在评论区与我们留言分享~</p> ]]>
+</content:encoded>
+<itunes:duration>02:02:21</itunes:duration>
+</item>
+<item>
+<title>Vol.035 佛罗里达州不养闲人丨闲聊《GTA6》</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/658b85d320d779b49df4bf97/media.xyzcdn.net/lktitwnBw6TQU2SGLmw3M04Wr8SN.m4a" type="audio/mp4" length="139416667"/>
+<guid isPermaLink="false">658b85d320d779b49df4bf97</guid>
+<pubDate>Wed, 27 Dec 2023 02:02:59 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始Game Start》第三十五期节目。</p><p>随着《GTA6》预告片的发布，这款令玩家们翘首以盼的经典系列正式回归大众视野，预告片累计播放突破1.5亿次，二创、cos层出不穷，影片中的细节更是被广大列文虎克们层层扒皮，细到连汽车椅背的轻微位移都不放过，随着时间的推移，更是迅速诞生了“在佛州可以不活，但不能没活”、“佛罗里达不养闲人”等文化热梗。</p><p>GTA系列究竟有着怎样的魔力？让广大玩家沉醉其中，对于《GTA6》，我们有着怎样的预测与期盼？</p><p>今天，蚂蚁终结者Even、秦岭车神冷场王、车辆定损专家麦壳老师将与大家精彩分享：</p><p>1、拖更原因(00:50)</p><p>2、对于GTA6预告的讨论(04:20)</p><p>3、从“开车碾人”到“毁灭蚂蚁”的讨论(16:22)</p><p>4、闲聊“佛罗里达州不养闲人”(26:24)</p><p>5、对于《GTA6》游戏新技术的讨论(38:34)</p><p>6、聊聊为什么喜欢“犯罪类题材”游戏(1:11:14)</p><p>7、等不起的2025(1:28:52)</p><p>听众朋友们对《GTA》系列都有哪些看法呢？欢迎在评论区分享讨论哦～</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/658b85d320d779b49df4bf97?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始Game Start》第三十五期节目。</p><p>随着《GTA6》预告片的发布，这款令玩家们翘首以盼的经典系列正式回归大众视野，预告片累计播放突破1.5亿次，二创、cos层出不穷，影片中的细节更是被广大列文虎克们层层扒皮，细到连汽车椅背的轻微位移都不放过，随着时间的推移，更是迅速诞生了“在佛州可以不活，但不能没活”、“佛罗里达不养闲人”等文化热梗。</p><p>GTA系列究竟有着怎样的魔力？让广大玩家沉醉其中，对于《GTA6》，我们有着怎样的预测与期盼？</p><p>今天，蚂蚁终结者Even、秦岭车神冷场王、车辆定损专家麦壳老师将与大家精彩分享：</p><p>1、拖更原因(00:50)</p><p>2、对于GTA6预告的讨论(04:20)</p><p>3、从“开车碾人”到“毁灭蚂蚁”的讨论(16:22)</p><p>4、闲聊“佛罗里达州不养闲人”(26:24)</p><p>5、对于《GTA6》游戏新技术的讨论(38:34)</p><p>6、聊聊为什么喜欢“犯罪类题材”游戏(1:11:14)</p><p>7、等不起的2025(1:28:52)</p><p>听众朋友们对《GTA》系列都有哪些看法呢？欢迎在评论区分享讨论哦～</p> ]]>
+</content:encoded>
+<itunes:duration>01:36:07</itunes:duration>
+</item>
+<item>
+<title>Vol.034 我被美女包围了！闲聊游戏媚男文化</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/6569a0d736f7c4e74e18c855/media.xyzcdn.net/lpHxV08_oHB-v-60vRBSTZ79drr4.m4a" type="audio/mp4" length="259159184"/>
+<guid isPermaLink="false">6569a0d736f7c4e74e18c855</guid>
+<pubDate>Fri, 01 Dec 2023 09:01:11 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>嘉宾｜爱吃肉的肉肉</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始Game Start》第三十四期节目。</p><p>最近大家都没有想到，单机游戏《完蛋！我被美女包围了！》能成为近期最为出圈的国产游戏，无论是话题讨论度还是销量都遥遥领先于其他国产单机游戏。</p><p>游戏开始的三位男主播自然也要体验一下，这款“话题销量双丰收”的国产恋爱模拟类游戏到底有着怎样的魅力。</p><p>并且，时隔三十期后，游戏开始今天又请来了女嘉宾肉肉老师来与大家讨论她对“媚男游戏”的观点与看法。</p><p>今天，美术生狂怒的Even老师、二周目速通的冷场王老师、卡关到怀疑人生的麦壳老师以及释放叠甲被动技能的肉肉老师将与大家精彩分享：</p><p>1、各自的游戏进度(00:15)</p><p>2、游戏角色的讨论(15:10)</p><p>3、对媚宅游戏的看法(23:43)</p><p>4、乙女游戏与“她经济”(33:26)</p><p>5、爆款游戏的“去精英化”(1:11:38)</p><p>6、对媚男游戏的看法(1:29:52)</p><p>7、塞尔达传说中的媚男设定(1:35:52)</p><p>8、美女包围游戏中感受最真实的地方(2:03:14)</p><p>听众朋友们对《完蛋！我被美女包围了！》这款游戏都有哪些看法呢？对游戏中存在的“媚男”内容又有哪些看法呢？欢迎在评论区分享讨论哦～</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/6569a0d736f7c4e74e18c855?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>嘉宾｜爱吃肉的肉肉</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始Game Start》第三十四期节目。</p><p>最近大家都没有想到，单机游戏《完蛋！我被美女包围了！》能成为近期最为出圈的国产游戏，无论是话题讨论度还是销量都遥遥领先于其他国产单机游戏。</p><p>游戏开始的三位男主播自然也要体验一下，这款“话题销量双丰收”的国产恋爱模拟类游戏到底有着怎样的魅力。</p><p>并且，时隔三十期后，游戏开始今天又请来了女嘉宾肉肉老师来与大家讨论她对“媚男游戏”的观点与看法。</p><p>今天，美术生狂怒的Even老师、二周目速通的冷场王老师、卡关到怀疑人生的麦壳老师以及释放叠甲被动技能的肉肉老师将与大家精彩分享：</p><p>1、各自的游戏进度(00:15)</p><p>2、游戏角色的讨论(15:10)</p><p>3、对媚宅游戏的看法(23:43)</p><p>4、乙女游戏与“她经济”(33:26)</p><p>5、爆款游戏的“去精英化”(1:11:38)</p><p>6、对媚男游戏的看法(1:29:52)</p><p>7、塞尔达传说中的媚男设定(1:35:52)</p><p>8、美女包围游戏中感受最真实的地方(2:03:14)</p><p>听众朋友们对《完蛋！我被美女包围了！》这款游戏都有哪些看法呢？对游戏中存在的“媚男”内容又有哪些看法呢？欢迎在评论区分享讨论哦～</p> ]]>
+</content:encoded>
+<itunes:duration>02:14:15</itunes:duration>
+</item>
+<item>
+<title>Vol.033 人之统治与疯批的爱丨闲聊原神往事“比勒琪丝的哀歌”</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/655b350fc9e7cfe025dcdf32/media.xyzcdn.net/lmx3W39MJKyPjMBpT8dyJgAyc2As.m4a" type="audio/mp4" length="263596286"/>
+<guid isPermaLink="false">655b350fc9e7cfe025dcdf32</guid>
+<pubDate>Mon, 20 Nov 2023 10:29:35 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even&nbsp;冷场王&nbsp;麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第三十三期节目。</p><p>《原神》作为一款12+游戏，其平淡、套路（且发挥不稳定）的主线剧情，经常受到来自玩家以及路人的批评与质疑，也有人认为，《原神》作为一款拥有庞大世界观的游戏，其12+年龄分级着实拖了剧情表现的一波后腿。</p><p>然而，细心的玩家或者“原学家”一定知道，其实在主线之外，《原神》制作组也编撰了多个曲折离奇、情绪饱满、较为“黑深残”的、富有内涵的剧情，并将其分散、隐藏在游戏的各个支线之中。</p><p>今天半调子原学家Even老师，催眠目标对象冷场王老师，49年入枫丹麦壳老师将与大家精彩分享：</p><p>1、选题理由（00：01）</p><p>2、故事的开始（08：25）</p><p>3、须弥三神共治的始与终(35：02)</p><p>4、人治时代的来临(54：07)</p><p>5、人类王朝的强盛与终结(1：27：20)</p><p>6、尾声(2：02：02)</p><p>如果你喜欢本期“原神故事会”，请积极转发哦~对本期节目有任何疑问或意见、建议，也可以在评论区与我们互动，感谢收听本期《游戏开始》，祝你在黄金梦想过得愉快~</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/655b350fc9e7cfe025dcdf32?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even&nbsp;冷场王&nbsp;麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第三十三期节目。</p><p>《原神》作为一款12+游戏，其平淡、套路（且发挥不稳定）的主线剧情，经常受到来自玩家以及路人的批评与质疑，也有人认为，《原神》作为一款拥有庞大世界观的游戏，其12+年龄分级着实拖了剧情表现的一波后腿。</p><p>然而，细心的玩家或者“原学家”一定知道，其实在主线之外，《原神》制作组也编撰了多个曲折离奇、情绪饱满、较为“黑深残”的、富有内涵的剧情，并将其分散、隐藏在游戏的各个支线之中。</p><p>今天半调子原学家Even老师，催眠目标对象冷场王老师，49年入枫丹麦壳老师将与大家精彩分享：</p><p>1、选题理由（00：01）</p><p>2、故事的开始（08：25）</p><p>3、须弥三神共治的始与终(35：02)</p><p>4、人治时代的来临(54：07)</p><p>5、人类王朝的强盛与终结(1：27：20)</p><p>6、尾声(2：02：02)</p><p>如果你喜欢本期“原神故事会”，请积极转发哦~对本期节目有任何疑问或意见、建议，也可以在评论区与我们互动，感谢收听本期《游戏开始》，祝你在黄金梦想过得愉快~</p> ]]>
+</content:encoded>
+<itunes:duration>02:16:33</itunes:duration>
+</item>
+<item>
+<title>Vol.032 这垃圾游戏，真香！闲聊那些拿捏人性的游戏设计</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/654858ff164cf7cfbbcdd4c9/media.xyzcdn.net/lo-AzhnOxmjt8b6LK4v38T-J2KPy.m4a" type="audio/mp4" length="184585539"/>
+<guid isPermaLink="false">654858ff164cf7cfbbcdd4c9</guid>
+<pubDate>Mon, 06 Nov 2023 03:09:51 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第三十二期节目。</p><p>不知道大家有没有注意到一个现象，最近越来越多的人已经慢慢玩不动单机3A大作了，但用碎片化时间玩起手游来却乐此不疲。</p><p>我们的Even老师最近也陷入了这样的困境当中，究其原因，这都要“归功”于手游中那些拿捏住人性的游戏机制。</p><p>那么手游中都有哪些拿捏人性的游戏机制呢？这些游戏机制为何能够拿捏人性让玩家欲罢不能呢？如何客观地看待这些游戏机制呢？</p><p>今天被手游狠狠拿捏的Even老师，手游绝缘体冷场王老师，手游生产商麦壳老师将与大家精彩分享：</p><p>1、每日任务与体力机制(00:05)</p><p>2、游戏的章节式更新(26:45)</p><p>3、手游的抽卡机制(45:47)</p><p>4、限时限定的角色与道具(56:45)</p><p>5、手游的面子与里子(67:09)</p><p>6、游戏奶头乐化(79:01)</p><p>听众朋友们都有哪些被游戏机制拿捏的经历呢？欢迎留言与我们分享～</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/654858ff164cf7cfbbcdd4c9?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第三十二期节目。</p><p>不知道大家有没有注意到一个现象，最近越来越多的人已经慢慢玩不动单机3A大作了，但用碎片化时间玩起手游来却乐此不疲。</p><p>我们的Even老师最近也陷入了这样的困境当中，究其原因，这都要“归功”于手游中那些拿捏住人性的游戏机制。</p><p>那么手游中都有哪些拿捏人性的游戏机制呢？这些游戏机制为何能够拿捏人性让玩家欲罢不能呢？如何客观地看待这些游戏机制呢？</p><p>今天被手游狠狠拿捏的Even老师，手游绝缘体冷场王老师，手游生产商麦壳老师将与大家精彩分享：</p><p>1、每日任务与体力机制(00:05)</p><p>2、游戏的章节式更新(26:45)</p><p>3、手游的抽卡机制(45:47)</p><p>4、限时限定的角色与道具(56:45)</p><p>5、手游的面子与里子(67:09)</p><p>6、游戏奶头乐化(79:01)</p><p>听众朋友们都有哪些被游戏机制拿捏的经历呢？欢迎留言与我们分享～</p> ]]>
+</content:encoded>
+<itunes:duration>01:35:34</itunes:duration>
+</item>
+<item>
+<title>Vol.031 人生路漫漫，游戏永相伴丨闲聊游戏玩家的不同阶段</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/653732c3f5d0788cb57dea5b/media.xyzcdn.net/lviFFUmSjOpYAtj1ybg9Mq4y4w7i.m4a" type="audio/mp4" length="160588821"/>
+<guid isPermaLink="false">653732c3f5d0788cb57dea5b</guid>
+<pubDate>Tue, 24 Oct 2023 02:58:10 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第三十一期节目。</p><p>你爷爷关注的UP主更新啦！</p><p>距离我们上次更新已经一个多月了，为什么我们那么长时间没有更新节目呢？</p><p>因为近期我们的Even老师结婚了！恭喜Even老师走入了人生的新阶段！</p><p>Even老师结婚后也对游戏生活有了一些新的感悟，正好Even老师（新婚新郎）、冷场王老师（单身贵族）、麦壳老师（带娃奶爸）三人分别处于人生的三个不同的阶段。</p><p>本期节目三位主播老师将结合自己的生活，与大家聊聊作为游戏玩家从小到大不同人生阶段中对游戏的感悟与态度。</p><p>本期节目你将听到：</p><p>1、为什么要聊这期选题；</p><p>2、三位主播学生时代的游戏价值观；</p><p>3、三位主播工作后游戏生活的变化；</p><p>4、Even老师结婚后怎么平衡游戏与生活；</p><p>5、麦壳老师有娃后游戏生活的变化；</p><p>听众朋友们在游戏的不同阶段都有着什么样的游戏体验呢？欢迎在评论区与我们留言互动～</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/653732c3f5d0788cb57dea5b?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第三十一期节目。</p><p>你爷爷关注的UP主更新啦！</p><p>距离我们上次更新已经一个多月了，为什么我们那么长时间没有更新节目呢？</p><p>因为近期我们的Even老师结婚了！恭喜Even老师走入了人生的新阶段！</p><p>Even老师结婚后也对游戏生活有了一些新的感悟，正好Even老师（新婚新郎）、冷场王老师（单身贵族）、麦壳老师（带娃奶爸）三人分别处于人生的三个不同的阶段。</p><p>本期节目三位主播老师将结合自己的生活，与大家聊聊作为游戏玩家从小到大不同人生阶段中对游戏的感悟与态度。</p><p>本期节目你将听到：</p><p>1、为什么要聊这期选题；</p><p>2、三位主播学生时代的游戏价值观；</p><p>3、三位主播工作后游戏生活的变化；</p><p>4、Even老师结婚后怎么平衡游戏与生活；</p><p>5、麦壳老师有娃后游戏生活的变化；</p><p>听众朋友们在游戏的不同阶段都有着什么样的游戏体验呢？欢迎在评论区与我们留言互动～</p> ]]>
+</content:encoded>
+<itunes:duration>01:50:43</itunes:duration>
+</item>
+<item>
+<title>Vol.030 单排党集合！闲聊社恐玩家的联机之路</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/650fb51296875579711752db/media.xyzcdn.net/lubtS-WwulSSGMqAOqgNKJy6TUoF.m4a" type="audio/mp4" length="205042873"/>
+<guid isPermaLink="false">650fb51296875579711752db</guid>
+<pubDate>Sun, 24 Sep 2023 04:03:30 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第三十期节目。</p><p>随着互联网的发展与普及，游戏中的联机机制也越来越丰富与普遍。</p><p>大多数情况下，游戏的联机机制能够让玩家在合作与对抗中享受到更多的优秀乐趣。</p><p>但对于有一类“社恐”玩家来说联机却是一件极其痛苦的事情，他们从来不会主动与别人进行联机组队，甚至吃鸡只玩单排。</p><p>那么这种“社恐玩家”的心路历程是怎样的呢？因为联机游戏都发生过哪些有趣或尴尬的事呢？有哪些游戏是照顾了社恐玩家的“弱交互”机制呢？</p><p>今天社交恐怖分子Even老师、社交转变分子冷场王老师、社交恐惧分子麦壳老师将为大家精彩分享：</p><p>1、为什么要聊这期选题？</p><p>2、聊聊“吃鸡只单排”的玩家心理</p><p>3、那些年的联机轶事</p><p>4、近年涌现照顾社恐玩家的“弱交互”联机游戏</p><p>5、对联机游戏的未来展望</p><p>6、总结</p><p>听众朋友们平时玩游戏有什么“社恐”经历吗？欢迎在留言区与我们分享哦～</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/650fb51296875579711752db?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第三十期节目。</p><p>随着互联网的发展与普及，游戏中的联机机制也越来越丰富与普遍。</p><p>大多数情况下，游戏的联机机制能够让玩家在合作与对抗中享受到更多的优秀乐趣。</p><p>但对于有一类“社恐”玩家来说联机却是一件极其痛苦的事情，他们从来不会主动与别人进行联机组队，甚至吃鸡只玩单排。</p><p>那么这种“社恐玩家”的心路历程是怎样的呢？因为联机游戏都发生过哪些有趣或尴尬的事呢？有哪些游戏是照顾了社恐玩家的“弱交互”机制呢？</p><p>今天社交恐怖分子Even老师、社交转变分子冷场王老师、社交恐惧分子麦壳老师将为大家精彩分享：</p><p>1、为什么要聊这期选题？</p><p>2、聊聊“吃鸡只单排”的玩家心理</p><p>3、那些年的联机轶事</p><p>4、近年涌现照顾社恐玩家的“弱交互”联机游戏</p><p>5、对联机游戏的未来展望</p><p>6、总结</p><p>听众朋友们平时玩游戏有什么“社恐”经历吗？欢迎在留言区与我们分享哦～</p> ]]>
+</content:encoded>
+<itunes:duration>01:46:10</itunes:duration>
+</item>
+<item>
+<title>Vol.029 箱庭地图VS无缝世界丨闲聊游戏“代入感”</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/64f68c9180c9ec4c5f2fa68c/media.xyzcdn.net/lu806rv7lWTIN_q9E_Il2QmJKl8B.m4a" type="audio/mp4" length="194808102"/>
+<guid isPermaLink="false">64f68c9180c9ec4c5f2fa68c</guid>
+<pubDate>Tue, 05 Sep 2023 02:04:00 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第二十九期节目。</p><p>前段时间《黑神话：悟空》举办了游戏试玩会，从试玩画面上来看，游戏大概率在未来发售时会采用箱庭地图的模式，并非玩家所期待的那种“无缝地图”。</p><p>在那之后，《游戏开始GameStart》的三位主播：Even老师、冷场王老师以及麦壳老师对于“无缝地图”的必要性展开了激烈地讨论。</p><p>Even老师认为不是无缝地图会极大地影响玩家对游戏世界真实性的代入感，而冷场王老师与麦壳老师则认为箱庭游戏一样也可以让玩家对游戏世界的真实性产生代入感。</p><p>就这样，一场谁都说服不了谁的PK大战即将上演…</p><p>本期节目主要讨论内容：</p><p>1、为什么会聊这一期的选题？</p><p>2、箱庭地图是否会对游玩体验产生割裂感？</p><p>3、为什么很多玩家对无缝地图那么执着？</p><p>4、无缝地图与箱庭地图的边界在哪里？</p><p>5、无缝地图是不是游戏建立玩家带入感的唯一途径？</p><p>6、做游戏不能为了无缝而无缝。</p><p>7、不是无缝地图总是会有遗憾。</p><p>8、对《黑神话：悟空》的期待。</p><p>大家觉得箱庭地图和无缝地图哪种游戏形式更好呢？非无缝地图会影响大家的游玩体验吗？欢迎在评论区留下你们的观点～</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/64f68c9180c9ec4c5f2fa68c?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第二十九期节目。</p><p>前段时间《黑神话：悟空》举办了游戏试玩会，从试玩画面上来看，游戏大概率在未来发售时会采用箱庭地图的模式，并非玩家所期待的那种“无缝地图”。</p><p>在那之后，《游戏开始GameStart》的三位主播：Even老师、冷场王老师以及麦壳老师对于“无缝地图”的必要性展开了激烈地讨论。</p><p>Even老师认为不是无缝地图会极大地影响玩家对游戏世界真实性的代入感，而冷场王老师与麦壳老师则认为箱庭游戏一样也可以让玩家对游戏世界的真实性产生代入感。</p><p>就这样，一场谁都说服不了谁的PK大战即将上演…</p><p>本期节目主要讨论内容：</p><p>1、为什么会聊这一期的选题？</p><p>2、箱庭地图是否会对游玩体验产生割裂感？</p><p>3、为什么很多玩家对无缝地图那么执着？</p><p>4、无缝地图与箱庭地图的边界在哪里？</p><p>5、无缝地图是不是游戏建立玩家带入感的唯一途径？</p><p>6、做游戏不能为了无缝而无缝。</p><p>7、不是无缝地图总是会有遗憾。</p><p>8、对《黑神话：悟空》的期待。</p><p>大家觉得箱庭地图和无缝地图哪种游戏形式更好呢？非无缝地图会影响大家的游玩体验吗？欢迎在评论区留下你们的观点～</p> ]]>
+</content:encoded>
+<itunes:duration>01:40:52</itunes:duration>
+</item>
+<item>
+<title>Vol.028 人口普查、老寒腿、伏地魔｜闲聊那些源于生活的“游戏黑话”</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/64e73a113fa4090b742819b1/media.xyzcdn.net/lvXICOFlVUXzIuIns_iK7bo_Wt5k.m4a" type="audio/mp4" length="190001683"/>
+<guid isPermaLink="false">64e73a113fa4090b742819b1</guid>
+<pubDate>Thu, 24 Aug 2023 11:08:01 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第二十八期节目。</p><p>“黑话”一词往往是指出现于某一行业或小团体中进行沟通的内部语言。</p><p>游戏行业或游戏玩家团体也不例外，玩家之间沟通存在着大量的“游戏黑话”，很多黑话只有玩家他们自己才能明白是什么意思。</p><p>我们曾经在第二十五期节目《叠甲、破防、毒奶、挂机｜闲聊生活中的“游戏黑话”》中与大家聊过那些生活中常见的游戏黑话。在那期节目中我们就曾说过要出一期“姊妹篇”聊聊那些来源于生活中的游戏黑话。</p><p>那么都有哪些游戏黑话是源于生活的呢？这些生活中的词语被搬到游戏中演变成黑话后含义又有了哪些改变呢？这些游戏黑话的来源又是哪呢？</p><p>今天抽卡非酋Even老师、换弹癌患者冷场王老师、落地成盒的麦壳老师将与大家精彩分享：</p><p>1、选题的由来（00:15）</p><p>2、“648”“首充6块”与“氪金”（4:50）</p><p>3、“歪了”“池子”“欧洲人”“非酋”“保底”（14:06）</p><p>4、“脱非入欧”与“玄不救非，氪不改命”（25:45）</p><p>5、“人口普查”与“蓝绿修改器”（30:06）</p><p>6、“老寒腿”与“骨质疏松”（36:07）</p><p>7、“医学奇迹”与“没有膝盖”（41:42）</p><p>8、“XX癌”，如：“换弹癌”“仓鼠癌”“存档癌”等（53:32）</p><p>9、“肝”“肝硬化”与“肝上长了个人”（69:55）</p><p>10、“吃鸡”：大吉大利，今晚吃鸡！（73:00）</p><p>11、“送快递”“落地成盒”“过桥费”（78:22）</p><p>12、“伏地魔”“老六”与“决赛圈”（86:23）</p><p>13、总结（91:26）</p><p>大家听完节目后觉得还有哪些源于生活的游戏黑话我们没有聊到的呢？欢迎在评论区与我们讨论哦！</p><p>如果大家对我们的“游戏黑话”系列节目感兴趣的话，也欢迎收听我们的第二十五期节目《叠甲、破防、毒奶、挂机｜闲聊生活中的“游戏黑话”》哦！</p><p>————————</p><p>本期BGM：</p><p>《Euphoric&nbsp;Ride&nbsp;逸兴欢跃》- Hoyomix</p><p>《Chopin&nbsp;Waltz&nbsp;For&nbsp;Toutzy》- Eugen Cicero</p><p>《Chopin&nbsp;Blues&nbsp;–&nbsp;Impromtu》 - Eugen Cicero</p><p>《I&nbsp;Want&nbsp;To&nbsp;Live》- Borislav&nbsp;Slavov</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/64e73a113fa4090b742819b1?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第二十八期节目。</p><p>“黑话”一词往往是指出现于某一行业或小团体中进行沟通的内部语言。</p><p>游戏行业或游戏玩家团体也不例外，玩家之间沟通存在着大量的“游戏黑话”，很多黑话只有玩家他们自己才能明白是什么意思。</p><p>我们曾经在第二十五期节目《叠甲、破防、毒奶、挂机｜闲聊生活中的“游戏黑话”》中与大家聊过那些生活中常见的游戏黑话。在那期节目中我们就曾说过要出一期“姊妹篇”聊聊那些来源于生活中的游戏黑话。</p><p>那么都有哪些游戏黑话是源于生活的呢？这些生活中的词语被搬到游戏中演变成黑话后含义又有了哪些改变呢？这些游戏黑话的来源又是哪呢？</p><p>今天抽卡非酋Even老师、换弹癌患者冷场王老师、落地成盒的麦壳老师将与大家精彩分享：</p><p>1、选题的由来（00:15）</p><p>2、“648”“首充6块”与“氪金”（4:50）</p><p>3、“歪了”“池子”“欧洲人”“非酋”“保底”（14:06）</p><p>4、“脱非入欧”与“玄不救非，氪不改命”（25:45）</p><p>5、“人口普查”与“蓝绿修改器”（30:06）</p><p>6、“老寒腿”与“骨质疏松”（36:07）</p><p>7、“医学奇迹”与“没有膝盖”（41:42）</p><p>8、“XX癌”，如：“换弹癌”“仓鼠癌”“存档癌”等（53:32）</p><p>9、“肝”“肝硬化”与“肝上长了个人”（69:55）</p><p>10、“吃鸡”：大吉大利，今晚吃鸡！（73:00）</p><p>11、“送快递”“落地成盒”“过桥费”（78:22）</p><p>12、“伏地魔”“老六”与“决赛圈”（86:23）</p><p>13、总结（91:26）</p><p>大家听完节目后觉得还有哪些源于生活的游戏黑话我们没有聊到的呢？欢迎在评论区与我们讨论哦！</p><p>如果大家对我们的“游戏黑话”系列节目感兴趣的话，也欢迎收听我们的第二十五期节目《叠甲、破防、毒奶、挂机｜闲聊生活中的“游戏黑话”》哦！</p><p>————————</p><p>本期BGM：</p><p>《Euphoric&nbsp;Ride&nbsp;逸兴欢跃》- Hoyomix</p><p>《Chopin&nbsp;Waltz&nbsp;For&nbsp;Toutzy》- Eugen Cicero</p><p>《Chopin&nbsp;Blues&nbsp;–&nbsp;Impromtu》 - Eugen Cicero</p><p>《I&nbsp;Want&nbsp;To&nbsp;Live》- Borislav&nbsp;Slavov</p> ]]>
+</content:encoded>
+<itunes:duration>01:38:25</itunes:duration>
+</item>
+<item>
+<title>Vol.027 神位依旧，然负重前行丨闲聊《塞尔达传说：王国之泪》</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/64d8476ee490c5dee5493ffa/media.xyzcdn.net/lt6pOhZg5ucyGed0qpgoF0gYOXUl.m4a" type="audio/mp4" length="235668672"/>
+<guid isPermaLink="false">64d8476ee490c5dee5493ffa</guid>
+<pubDate>Sun, 13 Aug 2023 03:01:02 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第二十七期节目。</p><p>《塞尔达传说：王国之泪》是任天堂企划制作本部开发的动作冒险游戏，为《塞尔达传说》主系列的第20作，于2023年5月12日在Nintendo Switch上正式发售。</p><p>塞尔达传说的上一作《塞尔达传说：荒野之息》曾被玩家称之为“开放世界游戏教科书”，是世界上最经典的游戏之一，同时也荣获了当年的TGA最佳游戏。</p><p>时隔六年，《塞尔达传说：王国之泪》的发售被称之为是一款唯一能够“击败”荒野之息的游戏，也使得荒野之息被戏称为完全变成了王国之泪的大型试玩demo。</p><p>那么《塞尔达传说：王国之泪》的游玩体验究竟如何？比起前作都有哪些改变？都有哪些优缺点呢？</p><p>今天时间管理大师Even，隔岸观火大师冷场王，神庙逃课大师麦壳将与大家精彩讲述：</p><p>1、为什么拖了这么久了才聊王国之泪？（0:24）</p><p>2、各自的游玩进度（10:50）</p><p>3、对王泪的画面表示强烈不满（17:38）</p><p>4、超能力的逆天使用方式（35:25）</p><p>5、对神庙解谜的讨论（47:24）</p><p>6、对本作难度升级的讨论（57:38）</p><p>7、相比荒野之息变得更阴森了（73:46）</p><p>8、对游戏剧情的讨论（82:45）</p><p>9、对纯肝的地方表达不满（88:30）</p><p>10、对战斗设计的吐槽(96:33)</p><p>11、对放技能设计的强烈不满(107:22)</p><p>12、总结(112:15)</p><p>听众朋友们对王国之泪有什么想法，也欢迎在评论区留言哦！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/64d8476ee490c5dee5493ffa?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第二十七期节目。</p><p>《塞尔达传说：王国之泪》是任天堂企划制作本部开发的动作冒险游戏，为《塞尔达传说》主系列的第20作，于2023年5月12日在Nintendo Switch上正式发售。</p><p>塞尔达传说的上一作《塞尔达传说：荒野之息》曾被玩家称之为“开放世界游戏教科书”，是世界上最经典的游戏之一，同时也荣获了当年的TGA最佳游戏。</p><p>时隔六年，《塞尔达传说：王国之泪》的发售被称之为是一款唯一能够“击败”荒野之息的游戏，也使得荒野之息被戏称为完全变成了王国之泪的大型试玩demo。</p><p>那么《塞尔达传说：王国之泪》的游玩体验究竟如何？比起前作都有哪些改变？都有哪些优缺点呢？</p><p>今天时间管理大师Even，隔岸观火大师冷场王，神庙逃课大师麦壳将与大家精彩讲述：</p><p>1、为什么拖了这么久了才聊王国之泪？（0:24）</p><p>2、各自的游玩进度（10:50）</p><p>3、对王泪的画面表示强烈不满（17:38）</p><p>4、超能力的逆天使用方式（35:25）</p><p>5、对神庙解谜的讨论（47:24）</p><p>6、对本作难度升级的讨论（57:38）</p><p>7、相比荒野之息变得更阴森了（73:46）</p><p>8、对游戏剧情的讨论（82:45）</p><p>9、对纯肝的地方表达不满（88:30）</p><p>10、对战斗设计的吐槽(96:33)</p><p>11、对放技能设计的强烈不满(107:22)</p><p>12、总结(112:15)</p><p>听众朋友们对王国之泪有什么想法，也欢迎在评论区留言哦！</p> ]]>
+</content:encoded>
+<itunes:duration>02:02:05</itunes:duration>
+</item>
+<item>
+<title>Vol.026 始于游戏，归于生活｜闲聊游戏播客那些事儿</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/64bf41ba99e1e7669ef1a787/media.xyzcdn.net/loruXkxMagoK04KJ8jcooHfmusgr.m4a" type="audio/mp4" length="303097450"/>
+<guid isPermaLink="false">64bf41ba99e1e7669ef1a787</guid>
+<pubDate>Tue, 25 Jul 2023 03:30:02 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》一周年特别节目。</p><p>时光荏苒，岁月如梭。</p><p>不知不觉，《游戏开始GameStart》已经诞生一周年啦！</p><p>作为一档游戏类的播客节目，这档节目是如何诞生的？节目的录制流程是怎样？中间都遇到了哪些困难？我们最终是如何克服这些困难的？</p><p>今天社交王中王Even老师、二次元半导体冷场王老师、见钱眼开的麦壳老师将与大家精彩讲述：</p><p>1、节目是如何诞生的？（1:20）</p><p>2、节目一年的收益及播放情况汇报（26:06）</p><p>3、三位主播是如何认识的？（31:08）</p><p>4、三位主播外号的由来（33:08）</p><p>5、节目名称的由来（38:42）</p><p>6、节目Slogan的由来（42:50）</p><p>7、新手上路所遇到的问题与挑战（49:48）</p><p>8、三位主播的分工（85:29）</p><p>9、节目选题踩坑（109:20）</p><p>10、每位主播最喜欢的三期节目（115:02）</p><p>11、关于节目的选题方向（133:07）</p><p>12、未来展望（141:17）</p><p>除了本期节目聊到的内容，听众朋友们也可以在留言区留下你们最喜欢的一期节目，或者对我们节目有什么建议意见也欢迎畅所欲言～你们的建议是我们前进的最大动力！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/64bf41ba99e1e7669ef1a787?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》一周年特别节目。</p><p>时光荏苒，岁月如梭。</p><p>不知不觉，《游戏开始GameStart》已经诞生一周年啦！</p><p>作为一档游戏类的播客节目，这档节目是如何诞生的？节目的录制流程是怎样？中间都遇到了哪些困难？我们最终是如何克服这些困难的？</p><p>今天社交王中王Even老师、二次元半导体冷场王老师、见钱眼开的麦壳老师将与大家精彩讲述：</p><p>1、节目是如何诞生的？（1:20）</p><p>2、节目一年的收益及播放情况汇报（26:06）</p><p>3、三位主播是如何认识的？（31:08）</p><p>4、三位主播外号的由来（33:08）</p><p>5、节目名称的由来（38:42）</p><p>6、节目Slogan的由来（42:50）</p><p>7、新手上路所遇到的问题与挑战（49:48）</p><p>8、三位主播的分工（85:29）</p><p>9、节目选题踩坑（109:20）</p><p>10、每位主播最喜欢的三期节目（115:02）</p><p>11、关于节目的选题方向（133:07）</p><p>12、未来展望（141:17）</p><p>除了本期节目聊到的内容，听众朋友们也可以在留言区留下你们最喜欢的一期节目，或者对我们节目有什么建议意见也欢迎畅所欲言～你们的建议是我们前进的最大动力！</p> ]]>
+</content:encoded>
+<itunes:duration>02:36:56</itunes:duration>
+</item>
+<item>
+<title>Vol.025 叠甲、破防、毒奶、挂机｜闲聊生活中的“游戏黑话”</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/64a61e4c0c9873af3072b666/media.xyzcdn.net/lptHLs_3KDdn-RNxC-BwwdmndajU.m4a" type="audio/mp4" length="214776769"/>
+<guid isPermaLink="false">64a61e4c0c9873af3072b666</guid>
+<pubDate>Thu, 06 Jul 2023 01:52:12 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第二十五期节目。</p><p>“黑话”一词往往是指出现于某一行业或小团体中进行沟通的内部语言。</p><p>游戏行业或游戏玩家团体也不例外，玩家之间沟通存在着大量的“游戏黑话”，很多黑话只有玩家他们自己才能明白是什么意思。</p><p>但随着游戏玩家群体的扩大，部分游戏大众影响力的提升，越来越多的“游戏黑话”被玩家群体运用到了生活当中。</p><p>这也便使得很多非游戏玩家也逐渐开始明白这些“游戏黑话”的意思，并在生活中开始使用这些“游戏黑话”。</p><p>那么有哪些游戏中的“黑话”被运用到了生活中呢？生活中的“游戏黑话”与游戏中的“游戏黑话”在具体含义上又有什么区别呢？这些“游戏黑话”的来源又是哪呢？</p><p>今天赛博搬砖工Even老师，被秒杀乌龙的冷场王老师以及San值狂掉的麦壳老师将与大家精彩讲述：</p><p>1、“1”“+1”与“喜加一”(00:05)</p><p>2、“破防”“暴击”“魔法伤害”与“物理伤害”(09:36)</p><p>3、“叠甲”：叠最厚的甲，挨最毒的打！(17:41)</p><p>4、“奶”“毒奶”与“反向毒奶”：飞龙骑脸怎么输！（31:10）</p><p>5、“躺赢”：躺赢也是实力的一部分！（41:44）</p><p>6、“秒杀”“秒了”“Game Over”与“GG”（45:01）</p><p>7、“搬砖”：赛博社畜的悲惨生活！（55:37）</p><p>8、“星际玩家”：电子竞技无需视力！（63:03）</p><p>9、“微操”：我只是做了亿点微小的工作！(70:54)</p><p>10、“补刀”：请不要在我的伤口上撒盐！（81:17)</p><p>11、“挂机”：您好，我现在有事不在！（88:20)</p><p>12、“跑毒”“开荒”“San值狂掉”等其他游戏黑话（92:30)</p><p>大家觉得还有哪些游戏中的黑话应用到生活中的例子呢？欢迎和我们留言互动分享～</p><p>————————</p><p>本期BGM：</p><p>《ニュードンク・シティ》- 久保直人</p><p>《Love to Erroll》- Eugen Cicero</p><p>《Dear Frederique》- Eugen Cicero</p><p>《A Moment Apart》- Odesza</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/64a61e4c0c9873af3072b666?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第二十五期节目。</p><p>“黑话”一词往往是指出现于某一行业或小团体中进行沟通的内部语言。</p><p>游戏行业或游戏玩家团体也不例外，玩家之间沟通存在着大量的“游戏黑话”，很多黑话只有玩家他们自己才能明白是什么意思。</p><p>但随着游戏玩家群体的扩大，部分游戏大众影响力的提升，越来越多的“游戏黑话”被玩家群体运用到了生活当中。</p><p>这也便使得很多非游戏玩家也逐渐开始明白这些“游戏黑话”的意思，并在生活中开始使用这些“游戏黑话”。</p><p>那么有哪些游戏中的“黑话”被运用到了生活中呢？生活中的“游戏黑话”与游戏中的“游戏黑话”在具体含义上又有什么区别呢？这些“游戏黑话”的来源又是哪呢？</p><p>今天赛博搬砖工Even老师，被秒杀乌龙的冷场王老师以及San值狂掉的麦壳老师将与大家精彩讲述：</p><p>1、“1”“+1”与“喜加一”(00:05)</p><p>2、“破防”“暴击”“魔法伤害”与“物理伤害”(09:36)</p><p>3、“叠甲”：叠最厚的甲，挨最毒的打！(17:41)</p><p>4、“奶”“毒奶”与“反向毒奶”：飞龙骑脸怎么输！（31:10）</p><p>5、“躺赢”：躺赢也是实力的一部分！（41:44）</p><p>6、“秒杀”“秒了”“Game Over”与“GG”（45:01）</p><p>7、“搬砖”：赛博社畜的悲惨生活！（55:37）</p><p>8、“星际玩家”：电子竞技无需视力！（63:03）</p><p>9、“微操”：我只是做了亿点微小的工作！(70:54)</p><p>10、“补刀”：请不要在我的伤口上撒盐！（81:17)</p><p>11、“挂机”：您好，我现在有事不在！（88:20)</p><p>12、“跑毒”“开荒”“San值狂掉”等其他游戏黑话（92:30)</p><p>大家觉得还有哪些游戏中的黑话应用到生活中的例子呢？欢迎和我们留言互动分享～</p><p>————————</p><p>本期BGM：</p><p>《ニュードンク・シティ》- 久保直人</p><p>《Love to Erroll》- Eugen Cicero</p><p>《Dear Frederique》- Eugen Cicero</p><p>《A Moment Apart》- Odesza</p> ]]>
+</content:encoded>
+<itunes:duration>01:51:12</itunes:duration>
+</item>
+<item>
+<title>Vol.024 云了，但没完全云丨闲聊云游戏那些事儿</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/648c1bb7830480fdfa0d4b77/media.xyzcdn.net/liE-8MJqx3rGKaqOy09pJ1wBhcU_.m4a" type="audio/mp4" length="200804868"/>
+<guid isPermaLink="false">648c1bb7830480fdfa0d4b77</guid>
+<pubDate>Fri, 16 Jun 2023 08:22:15 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第二十四期节目。</p><p>人类从诞生至今的历史，都在不断地与现实物理距离做斗争，无论是马车、轮船、飞机、电话的发明，乃至互联网的诞生都在不断印证这一道理。</p><p>21世纪随着互联网的普及，网速的提高，芯片算力的提升，似乎“云XX”离我们越来越近了，这其中就包括云存储、云手机、云电脑，甚至“云游戏”。</p><p>前段时间索尼发布会发布了一款全新掌机，这款掌机可以通过串流技术游玩PS5游戏，是一款名副其实的“云游戏”掌机。</p><p>那么究竟什么是云游戏？云游戏的游玩方式与传统游戏有哪些不同？云游戏的体验究竟如何？今天抽卡一直歪的Even老师、二次元绝缘体冷场王老师、犯困仙人麦壳老师将与大家精彩讲述：</p><p>1、为什么要聊云游戏？(00:07-08:06)</p><p>2、云游戏的概念(08:07-19:36)</p><p>3、云游戏厂商(19:37-41:44)</p><p>4、主播参与过的云游戏项目(41:45-58:40)</p><p>5、云游戏的优点讨论(58:41-69:57)</p><p>6、云游戏的缺点讨论(69:58-85:26)</p><p>7、云游戏未来的发展方向(85:27-102:50)</p><p>听众朋友们对云游戏都有哪些看法呢？欢迎留言讨论～</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/648c1bb7830480fdfa0d4b77?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第二十四期节目。</p><p>人类从诞生至今的历史，都在不断地与现实物理距离做斗争，无论是马车、轮船、飞机、电话的发明，乃至互联网的诞生都在不断印证这一道理。</p><p>21世纪随着互联网的普及，网速的提高，芯片算力的提升，似乎“云XX”离我们越来越近了，这其中就包括云存储、云手机、云电脑，甚至“云游戏”。</p><p>前段时间索尼发布会发布了一款全新掌机，这款掌机可以通过串流技术游玩PS5游戏，是一款名副其实的“云游戏”掌机。</p><p>那么究竟什么是云游戏？云游戏的游玩方式与传统游戏有哪些不同？云游戏的体验究竟如何？今天抽卡一直歪的Even老师、二次元绝缘体冷场王老师、犯困仙人麦壳老师将与大家精彩讲述：</p><p>1、为什么要聊云游戏？(00:07-08:06)</p><p>2、云游戏的概念(08:07-19:36)</p><p>3、云游戏厂商(19:37-41:44)</p><p>4、主播参与过的云游戏项目(41:45-58:40)</p><p>5、云游戏的优点讨论(58:41-69:57)</p><p>6、云游戏的缺点讨论(69:58-85:26)</p><p>7、云游戏未来的发展方向(85:27-102:50)</p><p>听众朋友们对云游戏都有哪些看法呢？欢迎留言讨论～</p> ]]>
+</content:encoded>
+<itunes:duration>01:44:01</itunes:duration>
+</item>
+<item>
+<title>Vol.023 米哈游新作《八方轨迹异闻录》丨闲聊《崩坏：星穹铁道》</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/646dce501672628240ee2b3b/media.xyzcdn.net/ltYjZJeKRLmi0QuI59DuzR0nTteI.m4a" type="audio/mp4" length="211237306"/>
+<guid isPermaLink="false">646dce501672628240ee2b3b</guid>
+<pubDate>Wed, 24 May 2023 08:44:00 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第二十三期节目。</p><p>要说起最近热度最高的游戏，除了《塞尔达传说：王国之泪》外，那就是米哈游的最新作《崩坏：星穹铁道》了。</p><p>《崩坏：星穹铁道》不光是在全球多个国家拿到了畅销榜第一的成绩，同时在全球各大内容社区平台中也引发了对游戏的热烈讨论。</p><p>作为一款回合制的RPG游戏，老玩家很容易在《崩坏：星穹铁道》中看到如八方旅人系列、轨迹系列、女神异闻录系列游戏的影子。</p><p>那么《崩坏：星穹铁道》究竟是一款什么样的游戏呢？它的质量到底怎么样？我们对这款游戏都有哪些看法？</p><p>今天痴迷王国之泪无法自拔的Even老师、因为不玩二次元手游所以全程挂机的冷场王老师以及抽到景元后而感到空虚的麦壳老师将与大家精彩讨论：</p><p>1、各自的游玩进度；</p><p>2、星穹铁道都借鉴了哪些游戏；</p><p>3、音乐上的特别之处；</p><p>4、游戏中各种细节彩蛋讨论；</p><p>5、崩坏宇宙中的各种联系；</p><p>6、游戏中令人遗憾的地方；</p><p>7、反套路剧情讨论；</p><p>8、游戏玩法讨论；</p><p>9、回合制的JRPG落寞了吗？</p><p>如果你也是一名铁道玩家，或者对铁道游戏感兴趣的玩家，欢迎与我们留言讨论！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/646dce501672628240ee2b3b?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第二十三期节目。</p><p>要说起最近热度最高的游戏，除了《塞尔达传说：王国之泪》外，那就是米哈游的最新作《崩坏：星穹铁道》了。</p><p>《崩坏：星穹铁道》不光是在全球多个国家拿到了畅销榜第一的成绩，同时在全球各大内容社区平台中也引发了对游戏的热烈讨论。</p><p>作为一款回合制的RPG游戏，老玩家很容易在《崩坏：星穹铁道》中看到如八方旅人系列、轨迹系列、女神异闻录系列游戏的影子。</p><p>那么《崩坏：星穹铁道》究竟是一款什么样的游戏呢？它的质量到底怎么样？我们对这款游戏都有哪些看法？</p><p>今天痴迷王国之泪无法自拔的Even老师、因为不玩二次元手游所以全程挂机的冷场王老师以及抽到景元后而感到空虚的麦壳老师将与大家精彩讨论：</p><p>1、各自的游玩进度；</p><p>2、星穹铁道都借鉴了哪些游戏；</p><p>3、音乐上的特别之处；</p><p>4、游戏中各种细节彩蛋讨论；</p><p>5、崩坏宇宙中的各种联系；</p><p>6、游戏中令人遗憾的地方；</p><p>7、反套路剧情讨论；</p><p>8、游戏玩法讨论；</p><p>9、回合制的JRPG落寞了吗？</p><p>如果你也是一名铁道玩家，或者对铁道游戏感兴趣的玩家，欢迎与我们留言讨论！</p> ]]>
+</content:encoded>
+<itunes:duration>01:49:25</itunes:duration>
+</item>
+<item>
+<title>Vol.022 鲜花插在牛粪上？闲聊经典IP改编手游</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/645c641c306513184ca73f75/media.xyzcdn.net/lotcLxf9fzn6Tl2gOxhx_N39QOVS.m4a" type="audio/mp4" length="168696629"/>
+<guid isPermaLink="false">645c641c306513184ca73f75</guid>
+<pubDate>Thu, 11 May 2023 03:42:20 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第二十二期节目。</p><p>经典IP往往是指那些能够获得大众认可，能够经历时间沉淀，能够引发大众共鸣的作品。</p><p>大家最早对经典IP的主观印象也往往都是“童年回忆”“经典永流传”“重量级”等等褒义词汇。</p><p>但随着国内手机应用市场中出现越来越多“XXX正版授权”“XXX带你重温童年”“XXX带你回忆经典”等词汇，越来越多经典IP被搬上手游，这其中不乏一些粗制滥造、消费情怀、只会圈钱的作品，这也就使得很多玩家对于手游上的经典IP嗤之以鼻。</p><p>今天合金弹头战士Even老师、蚂蚁森林园丁冷场王老师、英雄传说受害者麦壳老师三位主播将与大家精彩讨论：</p><p>1、游玩《合金弹头：觉醒》而想到这期主题；</p><p>2、大家都玩过哪些经典IP改编手游的案例；</p><p>3、闲聊3A单机大作原封不动移植手游的案例；</p><p>4、闲聊经典IP针对手机优化后移植的案例；</p><p>5、闲聊经典IP变身氪金手游的案例；</p><p>6、闲聊经典IP改编手游的优秀案例《精灵宝可梦Go》；</p><p>7、经典IP改编手游总结及未来展望；</p><p>听众朋友们都有哪些对于经典IP改编手游的看法呢？都在手游上玩过哪些经典IP呢？欢迎在评论区留言分享！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/645c641c306513184ca73f75?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第二十二期节目。</p><p>经典IP往往是指那些能够获得大众认可，能够经历时间沉淀，能够引发大众共鸣的作品。</p><p>大家最早对经典IP的主观印象也往往都是“童年回忆”“经典永流传”“重量级”等等褒义词汇。</p><p>但随着国内手机应用市场中出现越来越多“XXX正版授权”“XXX带你重温童年”“XXX带你回忆经典”等词汇，越来越多经典IP被搬上手游，这其中不乏一些粗制滥造、消费情怀、只会圈钱的作品，这也就使得很多玩家对于手游上的经典IP嗤之以鼻。</p><p>今天合金弹头战士Even老师、蚂蚁森林园丁冷场王老师、英雄传说受害者麦壳老师三位主播将与大家精彩讨论：</p><p>1、游玩《合金弹头：觉醒》而想到这期主题；</p><p>2、大家都玩过哪些经典IP改编手游的案例；</p><p>3、闲聊3A单机大作原封不动移植手游的案例；</p><p>4、闲聊经典IP针对手机优化后移植的案例；</p><p>5、闲聊经典IP变身氪金手游的案例；</p><p>6、闲聊经典IP改编手游的优秀案例《精灵宝可梦Go》；</p><p>7、经典IP改编手游总结及未来展望；</p><p>听众朋友们都有哪些对于经典IP改编手游的看法呢？都在手游上玩过哪些经典IP呢？欢迎在评论区留言分享！</p> ]]>
+</content:encoded>
+<itunes:duration>01:56:14</itunes:duration>
+</item>
+<item>
+<title>Vol.021 廉颇老矣，尚能饭否？闲聊掌机与手游</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/64461dd7306513184c3abe55/media.xyzcdn.net/lnbgCtAqOXkqHSqVsBiIkYpYqY0p.m4a" type="audio/mp4" length="135983537"/>
+<guid isPermaLink="false">64461dd7306513184c3abe55</guid>
+<pubDate>Mon, 24 Apr 2023 06:12:39 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第二十一期节目。</p><p>最近有爆料称索尼可能正在开发一款代号为“Q Lite”的新掌机（掌上游戏机），该设备通过使用PS5的Remote Play功能来运行PS5上的游戏并搭载了8英寸大屏幕和自适应扳机。</p><p>索尼的上一代游戏掌机还要追溯到2011年所发布的PS vita，很多玩家都觉得掌机已经落寞了，现在的掌机已经完全被手机所替代。</p><p>那么掌机与手机究竟有什么异同呢？未来掌机在手机的挤压下是否还有生存空间呢？</p><p>今天掌机博物馆馆长Even老师，掌上车枪球达人冷场王老师，掌上模拟器玩家麦壳老师将与大家精彩讲述：</p><p>1、为什么要聊手机VS掌机这个话题？(00:10-04:33)</p><p>2、主播们都玩过哪些掌机？(04:34-08:34)</p><p>3、主播们最喜欢最热爱的掌机游戏都有哪些？(08:35-28:20)</p><p>4、手机与掌机发展的拐点(28:21-34:08)</p><p>5、手机游戏与掌机交互上的区别(34:09-50:49)</p><p>6、掌机游戏的性能与续航悖论(50:50-69:22)</p><p>7、掌机独占游戏的落寞（69:23-77:02)</p><p>8、掌机实体按键无法成为掌机护城河(77:03-84:04）</p><p>9、掌机与手机游戏未来展望及总结（84:05-93:42)</p><p>大家对掌机与游戏游戏有什么自己的看法呢？欢迎大家在评论区与主播们讨论！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/64461dd7306513184c3abe55?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第二十一期节目。</p><p>最近有爆料称索尼可能正在开发一款代号为“Q Lite”的新掌机（掌上游戏机），该设备通过使用PS5的Remote Play功能来运行PS5上的游戏并搭载了8英寸大屏幕和自适应扳机。</p><p>索尼的上一代游戏掌机还要追溯到2011年所发布的PS vita，很多玩家都觉得掌机已经落寞了，现在的掌机已经完全被手机所替代。</p><p>那么掌机与手机究竟有什么异同呢？未来掌机在手机的挤压下是否还有生存空间呢？</p><p>今天掌机博物馆馆长Even老师，掌上车枪球达人冷场王老师，掌上模拟器玩家麦壳老师将与大家精彩讲述：</p><p>1、为什么要聊手机VS掌机这个话题？(00:10-04:33)</p><p>2、主播们都玩过哪些掌机？(04:34-08:34)</p><p>3、主播们最喜欢最热爱的掌机游戏都有哪些？(08:35-28:20)</p><p>4、手机与掌机发展的拐点(28:21-34:08)</p><p>5、手机游戏与掌机交互上的区别(34:09-50:49)</p><p>6、掌机游戏的性能与续航悖论(50:50-69:22)</p><p>7、掌机独占游戏的落寞（69:23-77:02)</p><p>8、掌机实体按键无法成为掌机护城河(77:03-84:04）</p><p>9、掌机与手机游戏未来展望及总结（84:05-93:42)</p><p>大家对掌机与游戏游戏有什么自己的看法呢？欢迎大家在评论区与主播们讨论！</p> ]]>
+</content:encoded>
+<itunes:duration>01:33:41</itunes:duration>
+</item>
+<item>
+<title>Vol.020 戏说不胡说，改编不瞎编｜闲聊剧版《最后生还者》</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/64301cb066e4c00c6a79d0d1/media.xyzcdn.net/lsTbr5HBScEqmynEfDBPozj4ThyW.m4a" type="audio/mp4" length="185588191"/>
+<guid isPermaLink="false">64301cb066e4c00c6a79d0d1</guid>
+<pubDate>Fri, 07 Apr 2023 13:37:51 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第二十期节目。</p><p>《最后生还者》是一款由顽皮狗工作室制作的末日题材动作冒险游戏，讲述了在感染者横行的世界中，主角乔尔和艾莉的求生之旅。</p><p>这款游戏在剧情、画面、音乐、玩法等方面都得到了玩家和媒体的高度评价，被认为是一款“重新定义了游戏叙事的杰作”。</p><p>最近，由游戏改编的电视剧集在美国HBO电视台播放，电视剧一经播出便好评如潮，被观众称之为“史上最成功的游戏改编剧”，不光创造了收视纪录，而且豆瓣评分一直在9分以上高居不下。</p><p>那么《最后生还者》这部电视剧究竟优秀在哪？作为游改剧何以获得如此好的口碑？</p><p>今天落泪直男Even老师、电子贩子冷场王老师以及被剧透到一脸懵逼的麦壳老师将与大家详细聊聊：</p><p>1.什么时候开始觉得《最后生还者》电视剧好看的？</p><p>2.详谈剧里哪些细节是在为第二季做铺垫？</p><p>3.对剧中及游戏中乔尔人物及性格特点的讨论</p><p>4.电视剧与游戏异同点讨论</p><p>5.对电视剧选角及表演的讨论</p><p>6.电视剧的优缺点讨论</p><p>7.对《最后生还者》第二季的展望</p><p>8.对电视剧的一些小遗憾讨论</p><p>欢迎各位听友点击收听！（注意：本期节目涉及剧透，介意剧透者请谨慎收听！）</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/64301cb066e4c00c6a79d0d1?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第二十期节目。</p><p>《最后生还者》是一款由顽皮狗工作室制作的末日题材动作冒险游戏，讲述了在感染者横行的世界中，主角乔尔和艾莉的求生之旅。</p><p>这款游戏在剧情、画面、音乐、玩法等方面都得到了玩家和媒体的高度评价，被认为是一款“重新定义了游戏叙事的杰作”。</p><p>最近，由游戏改编的电视剧集在美国HBO电视台播放，电视剧一经播出便好评如潮，被观众称之为“史上最成功的游戏改编剧”，不光创造了收视纪录，而且豆瓣评分一直在9分以上高居不下。</p><p>那么《最后生还者》这部电视剧究竟优秀在哪？作为游改剧何以获得如此好的口碑？</p><p>今天落泪直男Even老师、电子贩子冷场王老师以及被剧透到一脸懵逼的麦壳老师将与大家详细聊聊：</p><p>1.什么时候开始觉得《最后生还者》电视剧好看的？</p><p>2.详谈剧里哪些细节是在为第二季做铺垫？</p><p>3.对剧中及游戏中乔尔人物及性格特点的讨论</p><p>4.电视剧与游戏异同点讨论</p><p>5.对电视剧选角及表演的讨论</p><p>6.电视剧的优缺点讨论</p><p>7.对《最后生还者》第二季的展望</p><p>8.对电视剧的一些小遗憾讨论</p><p>欢迎各位听友点击收听！（注意：本期节目涉及剧透，介意剧透者请谨慎收听！）</p> ]]>
+</content:encoded>
+<itunes:duration>01:36:08</itunes:duration>
+</item>
+<item>
+<title>Vol.019 游戏如何“抄越”未来？｜闲聊游戏抄袭</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/641915eb179eec5331e8b611/media.xyzcdn.net/loV8ED_mnoWfP62IswFGx9uazM92.m4a" type="audio/mp4" length="130656029"/>
+<guid isPermaLink="false">641915eb179eec5331e8b611</guid>
+<pubDate>Tue, 21 Mar 2023 02:26:50 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第十九期节目。</p><p>一名婴儿对世界的交互往往都是从模仿大人开始，而模仿在人类诞生之初便已存在，是人类文明进步的阶梯。</p><p>我们自古以来都有“青出于蓝而胜于蓝”“站在巨人的肩膀上”这类说法，对于游戏来说也是一样，经典的游戏玩法永远都是那些，即使是最好的游戏也是不断在前作的基础上进行借鉴与改进从而迭代而来。</p><p>可是，对于一些急功近利或不爱思考的人来说，“抄袭”与“剽窃”往往是最安全的捷径，他们对精品游戏进行“像素级复刻”，不做任何创新，对于这类游戏，游戏玩家必然会嗤之以鼻。</p><p>那么，游戏抄袭与致敬的区别在哪里？他们的边界在哪里？哪种抄袭是玩家可以接受的？哪种抄袭是玩家绝对不可接受的？游戏制作如何才能“抄”出自己的风格与特点？</p><p>今天赏金猎人Even老师、二次元绝缘体冷场王老师、侠盗黑手党麦壳老师将为大家精彩讲述：</p><p>1、闲聊抄袭与致敬的区别（00:06-07:49）</p><p>2、抄袭届教父腾讯（07:50-12:39）</p><p>3、《噬神者》《讨鬼传》与《怪物猎人》系列（12:40-31:45）</p><p>4、《卧龙》与魂系列游戏（31:46-48:16）</p><p>5、原神沙漠绿洲与《奇异人生》《赛博朋克2077》（48:17-54:24）</p><p>6、《塞尔达无双》与其他无双类游戏（54:25-58:35）</p><p>7、《迷你世界》与《我的世界》（58:36-67:25）</p><p>8、CF、CS、COD、战地、光环及其他FPS游戏（67:26-75:55）</p><p>9、《双人成行》：游戏届的头号玩家（75:56-79:02）</p><p>10、《黑手党》系列、《侠盗圣徒》系列、《看门狗》系列与《GTA》系列（79:03-86:04）</p><p>11、总结游戏如何“抄”越未来（86:05-90:01）</p><p>大家对游戏界的“模仿”“抄袭”与“致敬”怎么看呢？欢迎在评论区一起讨论！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/641915eb179eec5331e8b611?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第十九期节目。</p><p>一名婴儿对世界的交互往往都是从模仿大人开始，而模仿在人类诞生之初便已存在，是人类文明进步的阶梯。</p><p>我们自古以来都有“青出于蓝而胜于蓝”“站在巨人的肩膀上”这类说法，对于游戏来说也是一样，经典的游戏玩法永远都是那些，即使是最好的游戏也是不断在前作的基础上进行借鉴与改进从而迭代而来。</p><p>可是，对于一些急功近利或不爱思考的人来说，“抄袭”与“剽窃”往往是最安全的捷径，他们对精品游戏进行“像素级复刻”，不做任何创新，对于这类游戏，游戏玩家必然会嗤之以鼻。</p><p>那么，游戏抄袭与致敬的区别在哪里？他们的边界在哪里？哪种抄袭是玩家可以接受的？哪种抄袭是玩家绝对不可接受的？游戏制作如何才能“抄”出自己的风格与特点？</p><p>今天赏金猎人Even老师、二次元绝缘体冷场王老师、侠盗黑手党麦壳老师将为大家精彩讲述：</p><p>1、闲聊抄袭与致敬的区别（00:06-07:49）</p><p>2、抄袭届教父腾讯（07:50-12:39）</p><p>3、《噬神者》《讨鬼传》与《怪物猎人》系列（12:40-31:45）</p><p>4、《卧龙》与魂系列游戏（31:46-48:16）</p><p>5、原神沙漠绿洲与《奇异人生》《赛博朋克2077》（48:17-54:24）</p><p>6、《塞尔达无双》与其他无双类游戏（54:25-58:35）</p><p>7、《迷你世界》与《我的世界》（58:36-67:25）</p><p>8、CF、CS、COD、战地、光环及其他FPS游戏（67:26-75:55）</p><p>9、《双人成行》：游戏届的头号玩家（75:56-79:02）</p><p>10、《黑手党》系列、《侠盗圣徒》系列、《看门狗》系列与《GTA》系列（79:03-86:04）</p><p>11、总结游戏如何“抄”越未来（86:05-90:01）</p><p>大家对游戏界的“模仿”“抄袭”与“致敬”怎么看呢？欢迎在评论区一起讨论！</p> ]]>
+</content:encoded>
+<itunes:duration>01:30:01</itunes:duration>
+</item>
+<item>
+<title>Vol.018 人类物种多样性研究报告｜闲聊游戏客服那些事儿</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/640ae05a092eb63cb0486079/media.xyzcdn.net/luS-f93eSJNWnYTkX7oZjcSKQJIi.m4a" type="audio/mp4" length="195296004"/>
+<guid isPermaLink="false">640ae05a092eb63cb0486079</guid>
+<pubDate>Fri, 10 Mar 2023 07:46:34 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第十八期节目。</p><p>我们曾在第十一期节目《拜托了另外七个我！闲聊游戏运营那些事儿》中聊过游戏运营平时的工作都有哪些。其中有关游戏用户运营与游戏社区社群运营的部分工作，其主要内容就是与各种游戏用户玩家打交道，可以统称为游戏客服相关工作。在主播麦壳老师作为游戏客服的工作过程中，就遇到过许多“奇葩”玩家，这些玩家千奇百怪总是能让人大跌眼镜。</p><p>今天血压喷射战士麦壳老师、心理学教父Even老师、阅兵狂魔冷场王老师将给大家精彩分享：</p><p>1、土豪玩家让我认识到了世界的参差（00:15-15:35）</p><p>2、伪土豪玩家氪金大赏(15:36-31:42)</p><p>3、氪金玩家技不如人系列(31:43-47:19)</p><p>4、奇葩玩家之强迫症系列（47:20-64:32)</p><p>5、奇葩玩家之胡搅蛮缠系列(64:33-71:57)</p><p>6、奇葩玩家之劳模系列(71:58-86:59)</p><p>7、其他奇葩玩家分享(87:00-100:51)</p><p>希望大家能喜欢这期节目，也可以在评论区聊聊对于这些“奇葩”玩家的看法与分析，我们争取未来再给大家带来更多更有意思的相关内容！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/640ae05a092eb63cb0486079?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第十八期节目。</p><p>我们曾在第十一期节目《拜托了另外七个我！闲聊游戏运营那些事儿》中聊过游戏运营平时的工作都有哪些。其中有关游戏用户运营与游戏社区社群运营的部分工作，其主要内容就是与各种游戏用户玩家打交道，可以统称为游戏客服相关工作。在主播麦壳老师作为游戏客服的工作过程中，就遇到过许多“奇葩”玩家，这些玩家千奇百怪总是能让人大跌眼镜。</p><p>今天血压喷射战士麦壳老师、心理学教父Even老师、阅兵狂魔冷场王老师将给大家精彩分享：</p><p>1、土豪玩家让我认识到了世界的参差（00:15-15:35）</p><p>2、伪土豪玩家氪金大赏(15:36-31:42)</p><p>3、氪金玩家技不如人系列(31:43-47:19)</p><p>4、奇葩玩家之强迫症系列（47:20-64:32)</p><p>5、奇葩玩家之胡搅蛮缠系列(64:33-71:57)</p><p>6、奇葩玩家之劳模系列(71:58-86:59)</p><p>7、其他奇葩玩家分享(87:00-100:51)</p><p>希望大家能喜欢这期节目，也可以在评论区聊聊对于这些“奇葩”玩家的看法与分析，我们争取未来再给大家带来更多更有意思的相关内容！</p> ]]>
+</content:encoded>
+<itunes:duration>01:41:10</itunes:duration>
+</item>
+<item>
+<title>Vol.017 砸掉策划饭碗，世界属于AI | 闲聊chatGPT与游戏</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/63f8141ea42b41bccb6358f2/media.xyzcdn.net/lhYBZ2xm22qwgykWHFQErvRw8-Hi.m4a" type="audio/mp4" length="133065277"/>
+<guid isPermaLink="false">63f8141ea42b41bccb6358f2</guid>
+<pubDate>Fri, 24 Feb 2023 01:34:22 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第十七期节目。</p><p>最近这段时间chatGPT这款人工智能聊天工具又被推向了风口浪尖，有人说他是被人类所打开的潘多拉魔盒；有人说在不久的将来人类将会彻底被AI所统治；而有的人则对chatGPT嗤之以鼻，觉得仍然还是人工智障，远没有达到人工智能的水平。</p><p>近期《游戏开始GameStart》的主播们也是跟风体验了chatGPT，以及chatGPT的升级版本“New bing”，并与ChatGPT们展开了“激烈且友好”的交流。</p><p>今天《游戏开始GameStart》的三位常驻主播：由化脓性扁桃体炎恢复而满血复活的Even老师；常年被微软歧视而到现在都没有拿到内测资格的微软老玩家冷场王老师；以及工作被AI取代而即将丢掉饭碗的麦壳老师将结合自身体验从游戏玩家的角度与大家精彩分享：</p><p>1.闲聊ChatGPT与New bing的区别。</p><p>2.ChatGPT跟普通对话软件有什么不一样？</p><p>3.我们最近都用ChatGPT干了些啥？</p><p>4.ChatGPT会给未来的游戏带来哪些改变？</p><p>5.ChatGPT在游戏开发中的应用。</p><p>本期节目全部内容及以上文案内容均不由ChatGPT自动生成，请放心收听！！！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/63f8141ea42b41bccb6358f2?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第十七期节目。</p><p>最近这段时间chatGPT这款人工智能聊天工具又被推向了风口浪尖，有人说他是被人类所打开的潘多拉魔盒；有人说在不久的将来人类将会彻底被AI所统治；而有的人则对chatGPT嗤之以鼻，觉得仍然还是人工智障，远没有达到人工智能的水平。</p><p>近期《游戏开始GameStart》的主播们也是跟风体验了chatGPT，以及chatGPT的升级版本“New bing”，并与ChatGPT们展开了“激烈且友好”的交流。</p><p>今天《游戏开始GameStart》的三位常驻主播：由化脓性扁桃体炎恢复而满血复活的Even老师；常年被微软歧视而到现在都没有拿到内测资格的微软老玩家冷场王老师；以及工作被AI取代而即将丢掉饭碗的麦壳老师将结合自身体验从游戏玩家的角度与大家精彩分享：</p><p>1.闲聊ChatGPT与New bing的区别。</p><p>2.ChatGPT跟普通对话软件有什么不一样？</p><p>3.我们最近都用ChatGPT干了些啥？</p><p>4.ChatGPT会给未来的游戏带来哪些改变？</p><p>5.ChatGPT在游戏开发中的应用。</p><p>本期节目全部内容及以上文案内容均不由ChatGPT自动生成，请放心收听！！！</p> ]]>
+</content:encoded>
+<itunes:duration>01:31:41</itunes:duration>
+</item>
+<item>
+<title>Vol.016 国产单机游戏风云史之涅槃重生</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/63c958656bcfd94102680bf1/media.xyzcdn.net/lh27kWs1OoFcG-VF3YCtAFLsJVts.m4a" type="audio/mp4" length="187086017"/>
+<guid isPermaLink="false">63c958656bcfd94102680bf1</guid>
+<pubDate>Thu, 19 Jan 2023 14:49:08 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第十六期节目。</p><p>大部分单机游戏玩家提起国产单机游戏，可能往往都是各种不屑与嗤之以鼻。</p><p>他们觉得国产单机游戏题材单一，粗制滥造，只会圈钱。</p><p>这也就使得大部分单机游戏玩家，他们的精力只会关注于欧美日本等发达国家所发售的3A大作，对国产单机游戏却鲜有了解。</p><p>我们曾在上两期节目《国产单机游戏风云史之黎明破晓》及《国产单机游戏风云史之至暗时刻》中分别聊到了国产单机游戏的“光辉岁月”与“至暗时刻”。</p><p>那么近些年国产游戏又迎来了哪些蜕变？最近几年都有哪些值得一玩的国产游戏？我们对国产游戏的未来又抱有哪些期许与期望？</p><p>今天二次元破壁人冷场王、精灵球投掷者Even以及NPC收集人麦壳将为大家精彩讲述：</p><p>1.如何评价古剑3，神舞幻想等热门游戏？（00:31）</p><p>2.为什么国产游戏都是武侠古风修仙？（15:06）</p><p>3.古风游戏该如何突破破圈？（38:00）</p><p>4.如何评价游戏《戴森球计划》？（43:57）</p><p>5.闲聊关于《光明记忆》。（55:46）</p><p>6.闲聊《王者荣耀》及腾讯未来游戏项目展望。（60:59）</p><p>7.闲聊网易《永结无间》《阴阳师》等热门游戏及未来游戏项目展望。（85:35）</p><p>8.近些年单机游戏与网络游戏的界限愈发模糊。（96:42）</p><p>9.《原神》的一些优缺点讨论。（99:35）</p><p>10.对于《黑神话悟空》的未来展望。（106:38）</p><p>11.国产开放世界游戏趋势及对国外热门游戏模仿的探讨。（116:53）</p><p>自此，国产单机游戏风云史系列节目就此完结，我们也是第一次尝试这样的大型系列节目，如果听众有什么意见建议一定要在评论区留言反馈哦！最后祝大家新年快乐！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/63c958656bcfd94102680bf1?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第十六期节目。</p><p>大部分单机游戏玩家提起国产单机游戏，可能往往都是各种不屑与嗤之以鼻。</p><p>他们觉得国产单机游戏题材单一，粗制滥造，只会圈钱。</p><p>这也就使得大部分单机游戏玩家，他们的精力只会关注于欧美日本等发达国家所发售的3A大作，对国产单机游戏却鲜有了解。</p><p>我们曾在上两期节目《国产单机游戏风云史之黎明破晓》及《国产单机游戏风云史之至暗时刻》中分别聊到了国产单机游戏的“光辉岁月”与“至暗时刻”。</p><p>那么近些年国产游戏又迎来了哪些蜕变？最近几年都有哪些值得一玩的国产游戏？我们对国产游戏的未来又抱有哪些期许与期望？</p><p>今天二次元破壁人冷场王、精灵球投掷者Even以及NPC收集人麦壳将为大家精彩讲述：</p><p>1.如何评价古剑3，神舞幻想等热门游戏？（00:31）</p><p>2.为什么国产游戏都是武侠古风修仙？（15:06）</p><p>3.古风游戏该如何突破破圈？（38:00）</p><p>4.如何评价游戏《戴森球计划》？（43:57）</p><p>5.闲聊关于《光明记忆》。（55:46）</p><p>6.闲聊《王者荣耀》及腾讯未来游戏项目展望。（60:59）</p><p>7.闲聊网易《永结无间》《阴阳师》等热门游戏及未来游戏项目展望。（85:35）</p><p>8.近些年单机游戏与网络游戏的界限愈发模糊。（96:42）</p><p>9.《原神》的一些优缺点讨论。（99:35）</p><p>10.对于《黑神话悟空》的未来展望。（106:38）</p><p>11.国产开放世界游戏趋势及对国外热门游戏模仿的探讨。（116:53）</p><p>自此，国产单机游戏风云史系列节目就此完结，我们也是第一次尝试这样的大型系列节目，如果听众有什么意见建议一定要在评论区留言反馈哦！最后祝大家新年快乐！</p> ]]>
+</content:encoded>
+<itunes:duration>02:08:54</itunes:duration>
+</item>
+<item>
+<title>Vol.015 国产单机游戏风云史之至暗时刻</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/63b68917289d2739647d94d0/media.xyzcdn.net/liqJQMRsAutJVX8qtKpk2fUwDHo2.m4a" type="audio/mp4" length="164300737"/>
+<guid isPermaLink="false">63b68917289d2739647d94d0</guid>
+<pubDate>Thu, 05 Jan 2023 08:23:50 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第十五期节目。</p><p>大部分单机游戏玩家提起国产单机游戏，可能往往都是各种不屑与嗤之以鼻。</p><p>他们觉得国产单机游戏题材单一，粗制滥造，只会圈钱。</p><p>这也就使得大部分单机游戏玩家，他们的精力只会关注于欧美日本等发达国家所发售的3A大作，对国产单机游戏却鲜有了解。</p><p>我们曾在上一期节目《国产单机游戏风云史之黎明破晓》中聊到了国产单机游戏也曾有过属于他们的“光辉岁月”。</p><p>那么是从什么时候开始，国产单机游戏逐渐走向落寞了呢？究竟是什么原因导致国产单机游戏走向落寞？游戏厂商在国产游戏最落寞的时候又都做了些什么？</p><p>今天即使阳了也依旧不冷场的冷场王老师、已经杨康但需要靠止咳糖浆续命的Even老师以及没有羊了个羊但是已经阳了的麦壳老师将为大家继续精彩讲述：</p><p>1.国产单机游戏为什么会开始走向落寞？</p><p>2.盗版游戏对国产单机游戏的影响。</p><p>3.游戏机禁令对国产单机游戏的影响。</p><p>4.国产神游机的前世今生。</p><p>5.国产单机游戏新的尝试。</p><p>6.游戏机禁令解除后的影响。</p><p>7.国产游戏主机战斧F1的惨败经历。</p><p>国产单机游戏在这些年经历了属于他们的“至暗时刻”后，也逐渐慢慢迎来了转机。那么最近几年国产单机游戏又迎来了哪些蜕变？未来国产单机游戏又会朝着哪些方向发展呢？欢迎持续关注我们《游戏开始GameStart 》国产单机游戏风云史的系列节目，敬请期待！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/63b68917289d2739647d94d0?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第十五期节目。</p><p>大部分单机游戏玩家提起国产单机游戏，可能往往都是各种不屑与嗤之以鼻。</p><p>他们觉得国产单机游戏题材单一，粗制滥造，只会圈钱。</p><p>这也就使得大部分单机游戏玩家，他们的精力只会关注于欧美日本等发达国家所发售的3A大作，对国产单机游戏却鲜有了解。</p><p>我们曾在上一期节目《国产单机游戏风云史之黎明破晓》中聊到了国产单机游戏也曾有过属于他们的“光辉岁月”。</p><p>那么是从什么时候开始，国产单机游戏逐渐走向落寞了呢？究竟是什么原因导致国产单机游戏走向落寞？游戏厂商在国产游戏最落寞的时候又都做了些什么？</p><p>今天即使阳了也依旧不冷场的冷场王老师、已经杨康但需要靠止咳糖浆续命的Even老师以及没有羊了个羊但是已经阳了的麦壳老师将为大家继续精彩讲述：</p><p>1.国产单机游戏为什么会开始走向落寞？</p><p>2.盗版游戏对国产单机游戏的影响。</p><p>3.游戏机禁令对国产单机游戏的影响。</p><p>4.国产神游机的前世今生。</p><p>5.国产单机游戏新的尝试。</p><p>6.游戏机禁令解除后的影响。</p><p>7.国产游戏主机战斧F1的惨败经历。</p><p>国产单机游戏在这些年经历了属于他们的“至暗时刻”后，也逐渐慢慢迎来了转机。那么最近几年国产单机游戏又迎来了哪些蜕变？未来国产单机游戏又会朝着哪些方向发展呢？欢迎持续关注我们《游戏开始GameStart 》国产单机游戏风云史的系列节目，敬请期待！</p> ]]>
+</content:encoded>
+<itunes:duration>01:53:12</itunes:duration>
+</item>
+<item>
+<title>Vol.014 国产单机游戏风云史之黎明破晓</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/63981b813a2b7eba5ceb4595/media.xyzcdn.net/lqvuuVy5fZUbXfOfxqkcC6FZR9aC.m4a" type="audio/mp4" length="150259878"/>
+<guid isPermaLink="false">63981b813a2b7eba5ceb4595</guid>
+<pubDate>Tue, 13 Dec 2022 06:28:17 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第十四期节目。</p><p>大部分单机游戏玩家提起国产单机游戏，可能往往都是各种不屑与嗤之以鼻。</p><p>他们觉得国产单机游戏题材单一，粗制滥造，只会圈钱。</p><p>这也就使得大部分单机游戏玩家，他们的精力只会关注于欧美日本等发达国家所发售的3A大作，对国产单机游戏却鲜有了解。</p><p>但其实国产单机游戏也曾有过属于他们的“光辉岁月”，今天不再冷场的冷场王老师将为大家精彩讲述：</p><p>1.我们为什么要聊经典国产单机游戏？</p><p>2.我们都玩过哪些上古国产单机游戏？</p><p>3.国产三剑是指的哪三剑？</p><p>4.哪些国产单机游戏以现在的眼光看其实是被严重低估了？</p><p>5.从仙剑一到仙剑四的前世今生。</p><p>至于从仙剑四之后，国产单机游戏为什么会开始经历它的至暗时刻？国产单机游戏又是从什么时候开始涅槃重生？国产单机游戏的未来在哪里？欢迎持续关注我们《游戏开始GameStart 》国产单机游戏风云史的系列节目，敬请期待！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/63981b813a2b7eba5ceb4595?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第十四期节目。</p><p>大部分单机游戏玩家提起国产单机游戏，可能往往都是各种不屑与嗤之以鼻。</p><p>他们觉得国产单机游戏题材单一，粗制滥造，只会圈钱。</p><p>这也就使得大部分单机游戏玩家，他们的精力只会关注于欧美日本等发达国家所发售的3A大作，对国产单机游戏却鲜有了解。</p><p>但其实国产单机游戏也曾有过属于他们的“光辉岁月”，今天不再冷场的冷场王老师将为大家精彩讲述：</p><p>1.我们为什么要聊经典国产单机游戏？</p><p>2.我们都玩过哪些上古国产单机游戏？</p><p>3.国产三剑是指的哪三剑？</p><p>4.哪些国产单机游戏以现在的眼光看其实是被严重低估了？</p><p>5.从仙剑一到仙剑四的前世今生。</p><p>至于从仙剑四之后，国产单机游戏为什么会开始经历它的至暗时刻？国产单机游戏又是从什么时候开始涅槃重生？国产单机游戏的未来在哪里？欢迎持续关注我们《游戏开始GameStart 》国产单机游戏风云史的系列节目，敬请期待！</p> ]]>
+</content:encoded>
+<itunes:duration>01:43:36</itunes:duration>
+</item>
+<item>
+<title>Vol.013 魔兽人物志丨伊利丹：我命由我不由天（下）</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/638eaf7c00d7ad923d6f900f/media.xyzcdn.net/lr48uR4Pt66FbE2Ifx96-w96hnTf.m4a" type="audio/mp4" length="107980354"/>
+<guid isPermaLink="false">638eaf7c00d7ad923d6f900f</guid>
+<pubDate>Tue, 06 Dec 2022 02:57:00 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏归于生活，欢迎收听《游戏开始GameStart》第十三期节目。</p><p>“伊利丹”是著名网络游戏《魔兽世界》中的一个极其重要的角色，其知名度与帅气程度在早期的WAR3与wow中，可以称得上是与“巫妖王”分庭抗礼的存在，国内大多数玩家都对其“恶魔猎手”的形象，帅气的“蛋刀”与大翅膀，以及那句经典的“我被囚禁了一万年”印象深刻。</p><p>然而，许多人（以及脱坑的玩家）并不知道，这个兼具外表与实力的人气角色，究竟有着怎样的过往，他是如何一步一步变为大街小巷张贴海报中那个经典的“恶魔猎手”，以及在wow的世界中，伊利丹最终迎来了怎样的结局。</p><p>本期节目，主播EVEN将为大家讲解这位经典人物的传奇一生，三位主播也将结合自己的人生经历，聊聊我们在伊利丹身上看到的，对事业、爱情、友情、人生的感悟。</p><p>P.S.由于节目时长原因，本期节目分为上下半场，上半场节目请移步至《游戏开始GameStart》第十二期点击收听！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/638eaf7c00d7ad923d6f900f?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏归于生活，欢迎收听《游戏开始GameStart》第十三期节目。</p><p>“伊利丹”是著名网络游戏《魔兽世界》中的一个极其重要的角色，其知名度与帅气程度在早期的WAR3与wow中，可以称得上是与“巫妖王”分庭抗礼的存在，国内大多数玩家都对其“恶魔猎手”的形象，帅气的“蛋刀”与大翅膀，以及那句经典的“我被囚禁了一万年”印象深刻。</p><p>然而，许多人（以及脱坑的玩家）并不知道，这个兼具外表与实力的人气角色，究竟有着怎样的过往，他是如何一步一步变为大街小巷张贴海报中那个经典的“恶魔猎手”，以及在wow的世界中，伊利丹最终迎来了怎样的结局。</p><p>本期节目，主播EVEN将为大家讲解这位经典人物的传奇一生，三位主播也将结合自己的人生经历，聊聊我们在伊利丹身上看到的，对事业、爱情、友情、人生的感悟。</p><p>P.S.由于节目时长原因，本期节目分为上下半场，上半场节目请移步至《游戏开始GameStart》第十二期点击收听！</p> ]]>
+</content:encoded>
+<itunes:duration>01:14:26</itunes:duration>
+</item>
+<item>
+<title>Vol.012 魔兽人物志丨伊利丹：我命由我不由天（上）</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/6382f4cdf6753f4e9d4d58d0/media.xyzcdn.net/lkSLhmSIV04VDNhWgUeBwj41RoOI.m4a" type="audio/mp4" length="129457270"/>
+<guid isPermaLink="false">6382f4cdf6753f4e9d4d58d0</guid>
+<pubDate>Sun, 27 Nov 2022 05:25:33 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏归于生活，欢迎收听《游戏开始GameStart》第十二期节目。</p><p>“伊利丹”是著名网络游戏《魔兽世界》中的一个极其重要的角色，其知名度与帅气程度在早期的WAR3与wow中，可以称得上是与“巫妖王”分庭抗礼的存在，国内大多数玩家都对其“恶魔猎手”的形象，帅气的“蛋刀”与大翅膀，以及那句经典的“我被囚禁了一万年”印象深刻。</p><p>然而，许多人（以及脱坑的玩家）并不知道，这个兼具外表与实力的人气角色，究竟有着怎样的过往，他是如何一步一步变为大街小巷张贴海报中那个经典的“恶魔猎手”，以及在wow的世界中，伊利丹最终迎来了怎样的结局。</p><p>本期节目，主播EVEN将为大家讲解这位经典人物的传奇一生，三位主播也将结合自己的人生经历，聊聊我们在伊利丹身上看到的，对事业、爱情、友情、人生的感悟。</p><p>P.S.由于节目时长原因，本期节目分为上下半场，下半场节目请移步至《游戏开始GameStart》第十三期点击收听！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/6382f4cdf6753f4e9d4d58d0?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏归于生活，欢迎收听《游戏开始GameStart》第十二期节目。</p><p>“伊利丹”是著名网络游戏《魔兽世界》中的一个极其重要的角色，其知名度与帅气程度在早期的WAR3与wow中，可以称得上是与“巫妖王”分庭抗礼的存在，国内大多数玩家都对其“恶魔猎手”的形象，帅气的“蛋刀”与大翅膀，以及那句经典的“我被囚禁了一万年”印象深刻。</p><p>然而，许多人（以及脱坑的玩家）并不知道，这个兼具外表与实力的人气角色，究竟有着怎样的过往，他是如何一步一步变为大街小巷张贴海报中那个经典的“恶魔猎手”，以及在wow的世界中，伊利丹最终迎来了怎样的结局。</p><p>本期节目，主播EVEN将为大家讲解这位经典人物的传奇一生，三位主播也将结合自己的人生经历，聊聊我们在伊利丹身上看到的，对事业、爱情、友情、人生的感悟。</p><p>P.S.由于节目时长原因，本期节目分为上下半场，下半场节目请移步至《游戏开始GameStart》第十三期点击收听！</p> ]]>
+</content:encoded>
+<itunes:duration>01:29:15</itunes:duration>
+</item>
+<item>
+<title>Vol.011 拜托了另外七个我！闲聊游戏运营那些事儿</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/636b004fa5004aa3aa571012/media.xyzcdn.net/ls8g8LdqueyVuYU9aoikKJcYN71W.m4a" type="audio/mp4" length="133931861"/>
+<guid isPermaLink="false">636b004fa5004aa3aa571012</guid>
+<pubDate>Wed, 09 Nov 2022 08:00:00 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第十一期节目。</p><p>我们曾经在第四期节目聊过关于游戏发行的那些事儿，想必听完那期节目的大家应该会对游戏发行能够有一个基础的了解与认识。</p><p>但是有些听众可能会有所疑问，除了游戏发行，游戏运营平时都是做哪些工作的呢？</p><p>正好我们的常驻主播麦壳老师平时负责的便是游戏运营的相关工作，今天ELO摆烂员even，和谐城与石油勇士冷场王，尘世七神麦壳将与大家好好唠唠关于游戏运营的那些事儿：</p><p>1.游戏从立项到上线都有哪些环节？（0:27-6:45）</p><p>2.游戏运营的七种分类方式（6:46-21:50）</p><p>3.游戏产品运营（21:51-55:18）</p><p>4.游戏数据运营（55:19-68:47）</p><p>5.游戏内容运营（68:48-74:26）</p><p>6.游戏用户运营（74:27-79:21）</p><p>7.游戏新媒体运营（79:22-84:25）</p><p>8.游戏活动运营（84:26-87:23）</p><p>9.游戏社区社群运营（87:24-92:21）</p><p>除了游戏本身，我们也希望能够带给观众更多关于游戏行业内的一些节目内容，如果大家对这方面内容感兴趣的话，请多多点赞支持我们，谢谢大家！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/636b004fa5004aa3aa571012?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第十一期节目。</p><p>我们曾经在第四期节目聊过关于游戏发行的那些事儿，想必听完那期节目的大家应该会对游戏发行能够有一个基础的了解与认识。</p><p>但是有些听众可能会有所疑问，除了游戏发行，游戏运营平时都是做哪些工作的呢？</p><p>正好我们的常驻主播麦壳老师平时负责的便是游戏运营的相关工作，今天ELO摆烂员even，和谐城与石油勇士冷场王，尘世七神麦壳将与大家好好唠唠关于游戏运营的那些事儿：</p><p>1.游戏从立项到上线都有哪些环节？（0:27-6:45）</p><p>2.游戏运营的七种分类方式（6:46-21:50）</p><p>3.游戏产品运营（21:51-55:18）</p><p>4.游戏数据运营（55:19-68:47）</p><p>5.游戏内容运营（68:48-74:26）</p><p>6.游戏用户运营（74:27-79:21）</p><p>7.游戏新媒体运营（79:22-84:25）</p><p>8.游戏活动运营（84:26-87:23）</p><p>9.游戏社区社群运营（87:24-92:21）</p><p>除了游戏本身，我们也希望能够带给观众更多关于游戏行业内的一些节目内容，如果大家对这方面内容感兴趣的话，请多多点赞支持我们，谢谢大家！</p> ]]>
+</content:encoded>
+<itunes:duration>01:32:20</itunes:duration>
+</item>
+<item>
+<title>Vol.010《赛博朋克：边缘行者》收手吧阿祖，外面全是赛博精神病！</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/634f521ee67030aadb38f9e3/media.xyzcdn.net/ljWVm22quMKLjpWcOdxxTFTL7vln.m4a" type="audio/mp4" length="134680841"/>
+<guid isPermaLink="false">634f521ee67030aadb38f9e3</guid>
+<pubDate>Wed, 19 Oct 2022 01:25:49 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第十期节目。</p><p>最近网飞（Netflix）上线了一款动漫番剧《赛博朋克：边缘行者》引发了全球网友的热议。</p><p>这部动漫由扳机社（Trigger）制作，改编自波兰游戏制作公司波兰蠢驴（CDPR）制作的游戏《赛博朋克2077》。</p><p>动漫一经推出便大受好评，不光在向来评分严格的豆瓣平台获得了9.0的高分成绩，还使得游戏《赛博朋克2077》的日活重回巅峰，甚至有人开玩笑说这款游戏已经成为了世上最强“漫改游戏”。</p><p>今天《游戏开始GameStart》三位常驻主播赛博中间人Even、义体医生冷场王、仿生机器人麦壳将为大家精彩讲述：</p><p>1.《赛博朋克：边缘行者》讲述了一个什么样的故事？</p><p>2.赛博精神病是怎么一回事？</p><p>3.动漫是否有跳脱出传统的日漫框架做出创新？</p><p>4.主播们对动漫印象深刻的角色及桥段。</p><p>5.赛博朋克是什么意思，它所描绘的世界是怎样的？</p><p>6.主播们对科技影响生活的看法。</p><p>欢迎各位听友点击收听！（注意：本期节目涉及剧透，介意剧透者请谨慎收听！）</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/634f521ee67030aadb38f9e3?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第十期节目。</p><p>最近网飞（Netflix）上线了一款动漫番剧《赛博朋克：边缘行者》引发了全球网友的热议。</p><p>这部动漫由扳机社（Trigger）制作，改编自波兰游戏制作公司波兰蠢驴（CDPR）制作的游戏《赛博朋克2077》。</p><p>动漫一经推出便大受好评，不光在向来评分严格的豆瓣平台获得了9.0的高分成绩，还使得游戏《赛博朋克2077》的日活重回巅峰，甚至有人开玩笑说这款游戏已经成为了世上最强“漫改游戏”。</p><p>今天《游戏开始GameStart》三位常驻主播赛博中间人Even、义体医生冷场王、仿生机器人麦壳将为大家精彩讲述：</p><p>1.《赛博朋克：边缘行者》讲述了一个什么样的故事？</p><p>2.赛博精神病是怎么一回事？</p><p>3.动漫是否有跳脱出传统的日漫框架做出创新？</p><p>4.主播们对动漫印象深刻的角色及桥段。</p><p>5.赛博朋克是什么意思，它所描绘的世界是怎样的？</p><p>6.主播们对科技影响生活的看法。</p><p>欢迎各位听友点击收听！（注意：本期节目涉及剧透，介意剧透者请谨慎收听！）</p> ]]>
+</content:encoded>
+<itunes:duration>01:32:51</itunes:duration>
+</item>
+<item>
+<title>Vol.009 你能说这游戏不好吗？漫谈《羊了个羊》</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/63339c472a992d56e91e517a/media.xyzcdn.net/lgTwOZDOozmN3Wd9u6yAPmmasOmr.m4a" type="audio/mp4" length="119772735"/>
+<guid isPermaLink="false">63339c472a992d56e91e517a</guid>
+<pubDate>Wed, 28 Sep 2022 05:30:00 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活，欢迎收听《游戏开始GameStart》第九期节目。</p><p>最近，一款名为《羊了个羊》的小游戏，可以说是风靡全中国，无论是互联网上，朋友圈里，地铁里，公交上，几乎所有地方都有着这款游戏的身影。</p><p>那么《羊了个羊》这款小游戏究竟有什么样的魔力能让大家如此着迷呢？对于这款游戏开发商来说短期内的巨额收入是否应该被喷呢？</p><p>今天，《游戏开始GameStart》的三位常驻主播：“我就想跟外省PK”的Even、“坚决打死不看广告”的冷场王、“谁说外国月亮就是圆”的麦壳，将为大家精彩讨论：</p><p>1.为什么会玩羊了个羊这款游戏？</p><p>2.羊了个羊玩法与模式讨论。</p><p>3.H5小游戏的简单科普。</p><p>4.小游戏骗人看广告到底是不是原罪？</p><p>5.3A游戏是否有可以向羊了个羊学习的地方？</p><p>今天你羊了个羊了吗？如果你有任何想法或是不同观点，欢迎在评论区留言与我们讨论！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/63339c472a992d56e91e517a?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活，欢迎收听《游戏开始GameStart》第九期节目。</p><p>最近，一款名为《羊了个羊》的小游戏，可以说是风靡全中国，无论是互联网上，朋友圈里，地铁里，公交上，几乎所有地方都有着这款游戏的身影。</p><p>那么《羊了个羊》这款小游戏究竟有什么样的魔力能让大家如此着迷呢？对于这款游戏开发商来说短期内的巨额收入是否应该被喷呢？</p><p>今天，《游戏开始GameStart》的三位常驻主播：“我就想跟外省PK”的Even、“坚决打死不看广告”的冷场王、“谁说外国月亮就是圆”的麦壳，将为大家精彩讨论：</p><p>1.为什么会玩羊了个羊这款游戏？</p><p>2.羊了个羊玩法与模式讨论。</p><p>3.H5小游戏的简单科普。</p><p>4.小游戏骗人看广告到底是不是原罪？</p><p>5.3A游戏是否有可以向羊了个羊学习的地方？</p><p>今天你羊了个羊了吗？如果你有任何想法或是不同观点，欢迎在评论区留言与我们讨论！</p> ]]>
+</content:encoded>
+<itunes:duration>01:22:34</itunes:duration>
+</item>
+<item>
+<title>Vol.008 课本之外，游戏教会我爱与勇气｜教师节特辑</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/631bec41f3d15f16f4cc322f/media.xyzcdn.net/lu0Ns1haqwHWgHojO-4RQMUfOh3p.m4a" type="audio/mp4" length="157064118"/>
+<guid isPermaLink="false">631bec41f3d15f16f4cc322f</guid>
+<pubDate>Sat, 10 Sep 2022 01:45:37 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活，欢迎收听《游戏开始GameStart》第八期节目。</p><p>今天是中秋节，同时也是教师节。</p><p>我相信每个人在成长的道路上一定会遇到不同的老师，每一位老师都能够带给自己不同的人生感悟与人生思考。</p><p>老师也不一定是具象的人物，你的一段经历，你的一段历程，你看过的书，走过的路，甚至你所打过的游戏都有可能能够成为大家成长道路上的老师。</p><p>今天，《游戏开始GameStart》的三位常驻主播：PVP狗贼Even、泉水指挥官冷场王、爱的教育者麦壳，这三位“臭打游戏的”，一致认为游戏在他们成长道路上同样起着至关重要的作用，是无法被替代的老师之一。我们将听到他们分别讲述：</p><p>1、从PVP到宇宙的尽头，我们最求的永远不是结果而是过程——Even</p><p>2、从空之轨迹到宫崎英高，游戏教会了我爱与坚持——麦壳</p><p>3、从英雄连到纪元，RTS游戏让我再也不在网上键盘侠了——冷场王</p><p>感谢大家收听我们这期教师节特别节目，也祝大家教师节，中秋节双节快乐！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/631bec41f3d15f16f4cc322f?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活，欢迎收听《游戏开始GameStart》第八期节目。</p><p>今天是中秋节，同时也是教师节。</p><p>我相信每个人在成长的道路上一定会遇到不同的老师，每一位老师都能够带给自己不同的人生感悟与人生思考。</p><p>老师也不一定是具象的人物，你的一段经历，你的一段历程，你看过的书，走过的路，甚至你所打过的游戏都有可能能够成为大家成长道路上的老师。</p><p>今天，《游戏开始GameStart》的三位常驻主播：PVP狗贼Even、泉水指挥官冷场王、爱的教育者麦壳，这三位“臭打游戏的”，一致认为游戏在他们成长道路上同样起着至关重要的作用，是无法被替代的老师之一。我们将听到他们分别讲述：</p><p>1、从PVP到宇宙的尽头，我们最求的永远不是结果而是过程——Even</p><p>2、从空之轨迹到宫崎英高，游戏教会了我爱与坚持——麦壳</p><p>3、从英雄连到纪元，RTS游戏让我再也不在网上键盘侠了——冷场王</p><p>感谢大家收听我们这期教师节特别节目，也祝大家教师节，中秋节双节快乐！</p> ]]>
+</content:encoded>
+<itunes:duration>01:48:17</itunes:duration>
+</item>
+<item>
+<title>Vol.007 VR游戏是未来，还是未来的未来？</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/6316af9a43274df80456cf81/media.xyzcdn.net/lsAnbne7wdN-SW9uv8F-qooOtitC.m4a" type="audio/mp4" length="133963474"/>
+<guid isPermaLink="false">6316af9a43274df80456cf81</guid>
+<pubDate>Tue, 06 Sep 2022 02:25:30 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活，欢迎收听《游戏开始GameStart》第七期节目。</p><p>游戏娱乐讲究一个沉浸式体验，而VR游戏则是现阶段最能够带给玩家沉浸式体验的游戏模式。</p><p>随着智能头戴式设备普及，电影《头号玩家》大热以及游戏《半条命alyx》腾空出世，VR游戏这个概念也愈发被大众所熟知。</p><p>今天《游戏开始GameStart》的常驻三剑客：alyx人柱力Even，王牌飞行员冷场王以及近视眼VR玩家麦壳将为大家精彩讨论：</p><p>1、是否看好VR游戏的未来？</p><p>2、《半条命alyx》在玩法上有什么创新与突破？</p><p>3、硬件对于VR游戏是否重要？</p><p>4、VR游戏的门槛在哪里？</p><p>5、AR游戏对比VR游戏的利与弊</p><p>有人觉得VR游戏一定是游戏的未来，有人觉得VR游戏就是一个被资本打造出来圈钱的概念，有人觉得硬件的发展限制了VR的进步…那么，VR游戏是否是真的是游戏的未来呢？还是未来的未来？那么就赶快点击收听我们节目吧！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/6316af9a43274df80456cf81?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活，欢迎收听《游戏开始GameStart》第七期节目。</p><p>游戏娱乐讲究一个沉浸式体验，而VR游戏则是现阶段最能够带给玩家沉浸式体验的游戏模式。</p><p>随着智能头戴式设备普及，电影《头号玩家》大热以及游戏《半条命alyx》腾空出世，VR游戏这个概念也愈发被大众所熟知。</p><p>今天《游戏开始GameStart》的常驻三剑客：alyx人柱力Even，王牌飞行员冷场王以及近视眼VR玩家麦壳将为大家精彩讨论：</p><p>1、是否看好VR游戏的未来？</p><p>2、《半条命alyx》在玩法上有什么创新与突破？</p><p>3、硬件对于VR游戏是否重要？</p><p>4、VR游戏的门槛在哪里？</p><p>5、AR游戏对比VR游戏的利与弊</p><p>有人觉得VR游戏一定是游戏的未来，有人觉得VR游戏就是一个被资本打造出来圈钱的概念，有人觉得硬件的发展限制了VR的进步…那么，VR游戏是否是真的是游戏的未来呢？还是未来的未来？那么就赶快点击收听我们节目吧！</p> ]]>
+</content:encoded>
+<itunes:duration>01:32:21</itunes:duration>
+</item>
+<item>
+<title>Vol.006 得了，但不想放弃治疗丨闲聊电子阳痿</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/630d84adafeaa248b20211de/media.xyzcdn.net/lujK_tMoiAjnReOg2p7Vws7ZkUAc.m4a" type="audio/mp4" length="92436593"/>
+<guid isPermaLink="false">630d84adafeaa248b20211de</guid>
+<pubDate>Tue, 30 Aug 2022 08:00:00 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活，欢迎收听《游戏开始GameStart》第六期节目。</p><p>随着现代都市生活节奏的加快，“电子阳痿”这个四个字逐渐在游戏玩家群体中成为了一个被津津乐道的热门词汇。</p><p>“电子阳痿”主要是指热爱游戏的玩家们突然某天对游戏已然提不起任何兴趣，甚至打开游戏都成为了一种困难。游戏玩家们将自己的这种状态戏称为“电子阳痿”。</p><p>今天《游戏开始GameStart》的常驻三剑客：电子搬砖工Even，秋名山车神冷场王以及带娃奶爸麦壳将为大家精彩讲述：</p><p>1、近期游玩游戏现状</p><p>2、为什么越来越玩不动游戏了？</p><p>3、如何治疗“电子阳痿”？</p><p>虽然说“电子阳痿”这个现象在现代生活中越来越普遍，但我们还是希望能够尽自己最大可能去对抗“电子阳痿”，如果你对这个话题有共鸣或者也想和我们一样对抗它，那么就赶快点击收听我们节目吧！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/630d84adafeaa248b20211de?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活，欢迎收听《游戏开始GameStart》第六期节目。</p><p>随着现代都市生活节奏的加快，“电子阳痿”这个四个字逐渐在游戏玩家群体中成为了一个被津津乐道的热门词汇。</p><p>“电子阳痿”主要是指热爱游戏的玩家们突然某天对游戏已然提不起任何兴趣，甚至打开游戏都成为了一种困难。游戏玩家们将自己的这种状态戏称为“电子阳痿”。</p><p>今天《游戏开始GameStart》的常驻三剑客：电子搬砖工Even，秋名山车神冷场王以及带娃奶爸麦壳将为大家精彩讲述：</p><p>1、近期游玩游戏现状</p><p>2、为什么越来越玩不动游戏了？</p><p>3、如何治疗“电子阳痿”？</p><p>虽然说“电子阳痿”这个现象在现代生活中越来越普遍，但我们还是希望能够尽自己最大可能去对抗“电子阳痿”，如果你对这个话题有共鸣或者也想和我们一样对抗它，那么就赶快点击收听我们节目吧！</p> ]]>
+</content:encoded>
+<itunes:duration>01:03:43</itunes:duration>
+</item>
+<item>
+<title>Vol.005 曲高未必人不识——大型原神安利现场</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/63032ee62427ab3f84afadb2/media.xyzcdn.net/lsUMf8QFQ-i7bCP5d0hpGCWDQJkV.m4a" type="audio/mp4" length="112882913"/>
+<guid isPermaLink="false">63032ee62427ab3f84afadb2</guid>
+<pubDate>Mon, 22 Aug 2022 07:23:18 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>客串主播｜爱吃肉的肉肉</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第五期节目。</p><p>《原神》这款游戏可以说是最近两年多互联网话题热度最高的游戏之一，从开服时的“还原神作”，到现在的“不如原神”，它究竟发生了什么样的变化？为什么很多游戏玩家仍然对《原神》这款游戏抱有偏见与误解？</p><p>《原神》3.0版本即将上线，《游戏开始GameStart》的两位“原批斗士”Even老师与麦壳老师将为大家精彩讲述：</p><p>1、为什么会有从“原黑”到“原批”的角色转变</p><p>2、从JRPG到东方价值观，原神为何如此吸引他们</p><p>3、《原神》剧情、玩法以及音乐上的特别之处</p><p>4、总结《原神》这款游戏最适合的三个关键词</p><p>如果你是一名从来没玩过原神的玩家，请点击收听吃下我们这口安利！</p><p>如果你是一名原神玩家，请点击收听快来看看我们是否观点一致！</p><p>如果你是一名原黑，请点击收听后来评论区喷我们！</p><p>如果你是一名路人，恭喜你发现宝藏，赶快点击收听我们这档游戏杂谈节目吧！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/63032ee62427ab3f84afadb2?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>客串主播｜爱吃肉的肉肉</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第五期节目。</p><p>《原神》这款游戏可以说是最近两年多互联网话题热度最高的游戏之一，从开服时的“还原神作”，到现在的“不如原神”，它究竟发生了什么样的变化？为什么很多游戏玩家仍然对《原神》这款游戏抱有偏见与误解？</p><p>《原神》3.0版本即将上线，《游戏开始GameStart》的两位“原批斗士”Even老师与麦壳老师将为大家精彩讲述：</p><p>1、为什么会有从“原黑”到“原批”的角色转变</p><p>2、从JRPG到东方价值观，原神为何如此吸引他们</p><p>3、《原神》剧情、玩法以及音乐上的特别之处</p><p>4、总结《原神》这款游戏最适合的三个关键词</p><p>如果你是一名从来没玩过原神的玩家，请点击收听吃下我们这口安利！</p><p>如果你是一名原神玩家，请点击收听快来看看我们是否观点一致！</p><p>如果你是一名原黑，请点击收听后来评论区喷我们！</p><p>如果你是一名路人，恭喜你发现宝藏，赶快点击收听我们这档游戏杂谈节目吧！</p> ]]>
+</content:encoded>
+<itunes:duration>01:17:49</itunes:duration>
+</item>
+<item>
+<title>Vol.004 铜臭味儿拉满！美女嘉宾闲聊游戏发行那些事儿</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/62fb4498226f5c1fa0d588db/media.xyzcdn.net/lkBfFYFFGRnfkbjySBPmCQF7KqLE.m4a" type="audio/mp4" length="125277707"/>
+<guid isPermaLink="false">62fb4498226f5c1fa0d588db</guid>
+<pubDate>Tue, 16 Aug 2022 07:17:44 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>嘉宾｜爱吃肉的肉肉</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第四期节目。</p><p>每一款游戏从立项到最终上市都会经历研发到发行的过程，而这个过程除了相关从业人员外，普通玩家却鲜有了解。</p><p>尤其是游戏市场发行的相关工作与流程，更是行业内“不能明说的秘密”。</p><p>今天，《游戏开始GameStart》节目第一次请到了行业内的美女嘉宾大佬“爱吃肉的肉肉”与我们一同分享游戏发行的那些事儿。</p><p>1、市场的工作就是花钱！运营和市场的区别？他们的工作分别都有哪些？</p><p>2、出口转内销又出海！国产游戏出海都面临着哪些困境？</p><p>3、白骨精都没你能换皮！换皮游戏的数量为何如此之多？</p><p>4、“我X大听我的！”国内游戏市场发行的流程、游戏研发与市场的冲突都有哪些？</p><p>5、市场永远不会记得第二名！所谓“赛马”“养蛊”究竟是怎么回事？</p><p>本期内容干货满满，爆笑不断，嘉宾更是差点几度离场！欢迎大家点击收听～</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/62fb4498226f5c1fa0d588db?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>嘉宾｜爱吃肉的肉肉</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第四期节目。</p><p>每一款游戏从立项到最终上市都会经历研发到发行的过程，而这个过程除了相关从业人员外，普通玩家却鲜有了解。</p><p>尤其是游戏市场发行的相关工作与流程，更是行业内“不能明说的秘密”。</p><p>今天，《游戏开始GameStart》节目第一次请到了行业内的美女嘉宾大佬“爱吃肉的肉肉”与我们一同分享游戏发行的那些事儿。</p><p>1、市场的工作就是花钱！运营和市场的区别？他们的工作分别都有哪些？</p><p>2、出口转内销又出海！国产游戏出海都面临着哪些困境？</p><p>3、白骨精都没你能换皮！换皮游戏的数量为何如此之多？</p><p>4、“我X大听我的！”国内游戏市场发行的流程、游戏研发与市场的冲突都有哪些？</p><p>5、市场永远不会记得第二名！所谓“赛马”“养蛊”究竟是怎么回事？</p><p>本期内容干货满满，爆笑不断，嘉宾更是差点几度离场！欢迎大家点击收听～</p> ]]>
+</content:encoded>
+<itunes:duration>01:26:22</itunes:duration>
+</item>
+<item>
+<title>Vol.003 爱，死亡与PVP——我们为何如此痴迷游戏？</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/62f253f1226f5c1fa0d58569/media.xyzcdn.net/liMNbiVit-Z0oj7e2puO8FawQK5m.m4a" type="audio/mp4" length="108204052"/>
+<guid isPermaLink="false">62f253f1226f5c1fa0d58569</guid>
+<pubDate>Tue, 09 Aug 2022 12:32:48 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜ Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第三期节目。</p><p>电子游戏自发明诞生以来，一直受到无数人热爱与追捧。</p><p>电子游戏到底有何魅力让我们为何如此为之疯狂？</p><p>今天《游戏开始GameStart》的三位常驻主播：PVP狗贼Even、泉水指挥官冷场王、佛系少男麦壳将为大家经常讲述：</p><p>1.大家为何喜欢打电子游戏？</p><p>2.主播们是如何迷上游戏的？</p><p>3.热爱游戏究竟是人类的本能还是对生命的追求？</p><p>4.“我就是比你强！”——PVP与PVE那不得不说的故事。</p><p>5.游戏能为我们带来哪些不一样的人生体验？</p><p>为何主播们在节目中频繁自曝人渣级游戏价值观？为何主播们在录制现场差点动手干架？为何一向冷静的冷场王老师大喊“RNM，退钱！”</p><p>这一切的一切到底是人性的扭曲，还是道德的沦丧？精彩内容尽在本期节目，赶快点击收听吧（本期爆笑预警）！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/62f253f1226f5c1fa0d58569?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜ Even 冷场王 麦壳</p><p>始于游戏，归于生活。</p><p>欢迎收听《游戏开始GameStart》第三期节目。</p><p>电子游戏自发明诞生以来，一直受到无数人热爱与追捧。</p><p>电子游戏到底有何魅力让我们为何如此为之疯狂？</p><p>今天《游戏开始GameStart》的三位常驻主播：PVP狗贼Even、泉水指挥官冷场王、佛系少男麦壳将为大家经常讲述：</p><p>1.大家为何喜欢打电子游戏？</p><p>2.主播们是如何迷上游戏的？</p><p>3.热爱游戏究竟是人类的本能还是对生命的追求？</p><p>4.“我就是比你强！”——PVP与PVE那不得不说的故事。</p><p>5.游戏能为我们带来哪些不一样的人生体验？</p><p>为何主播们在节目中频繁自曝人渣级游戏价值观？为何主播们在录制现场差点动手干架？为何一向冷静的冷场王老师大喊“RNM，退钱！”</p><p>这一切的一切到底是人性的扭曲，还是道德的沦丧？精彩内容尽在本期节目，赶快点击收听吧（本期爆笑预警）！</p> ]]>
+</content:encoded>
+<itunes:duration>01:14:36</itunes:duration>
+</item>
+<item>
+<title>Vol.002 我就想好好玩个游戏氪不氪以？丨闲聊氪金</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/62ef93b7eb0492cf2f5083bc/media.xyzcdn.net/lvNEYfaAEVR5NLRxZllQSakCYDDQ.m4a" type="audio/mp4" length="128970365"/>
+<guid isPermaLink="false">62ef93b7eb0492cf2f5083bc</guid>
+<pubDate>Sun, 07 Aug 2022 10:28:07 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。欢迎收听《游戏开始GameStart》第二期节目。</p><p>随着移动支付愈发便利，游戏氪金也成为了一个越来越普遍的现象。</p><p>“648”“首充双倍”“DLC”“蓝绿修改器”等专有名词也越来越被大众所熟知。</p><p>今天《游戏开始GameStart》的三位常驻主播：三顾茅庐的Even、人机战神冷场王、原批斗士麦壳将跟大家详细聊聊：</p><p>1.主播们从小到大为游戏氪金都有哪些经历。</p><p>2.3A游戏大作对比氪金手游所面临的困境。</p><p>3.主播们对游戏氪金的态度。</p><p>欢迎大家点击收听！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/62ef93b7eb0492cf2f5083bc?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>始于游戏，归于生活。欢迎收听《游戏开始GameStart》第二期节目。</p><p>随着移动支付愈发便利，游戏氪金也成为了一个越来越普遍的现象。</p><p>“648”“首充双倍”“DLC”“蓝绿修改器”等专有名词也越来越被大众所熟知。</p><p>今天《游戏开始GameStart》的三位常驻主播：三顾茅庐的Even、人机战神冷场王、原批斗士麦壳将跟大家详细聊聊：</p><p>1.主播们从小到大为游戏氪金都有哪些经历。</p><p>2.3A游戏大作对比氪金手游所面临的困境。</p><p>3.主播们对游戏氪金的态度。</p><p>欢迎大家点击收听！</p> ]]>
+</content:encoded>
+<itunes:duration>01:28:55</itunes:duration>
+</item>
+<item>
+<title>Vol.001 为了玩游戏，我与爸妈极限拉扯</title>
+<enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/62de964efa15142e17251fd5/media.xyzcdn.net/lgafdR1Aj5vwS-ltkMdzWDsbC6V2.m4a" type="audio/mp4" length="122345509"/>
+<guid isPermaLink="false">62de964efa15142e17251fd5</guid>
+<pubDate>Mon, 25 Jul 2022 13:10:38 GMT</pubDate>
+<description>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>电子游戏乃学生家长之一生之敌，游戏机更是如同过街老鼠一般人人喊打。</p><p>不知道大家小时候是否都有过偷藏游戏机的经历？</p><p>学生时期都是如何偷偷玩游戏的呢？</p><p>玩游戏被父母发现后有什么牛皮的经历吗？</p><p>今天《游戏开始》的三位常驻主播：裤裆战神（Even）、合同达人（冷场王）以及地下索粉（麦壳）将给大家精彩讲述他们小时候与家长们极限拉扯的经历，现场爆笑不断状态频出，欢迎大家点击收听！</p> ]]>
+</description>
+<link>https://www.xiaoyuzhoufm.com/episode/62de964efa15142e17251fd5?utm_source=rss</link>
+<content:encoded>
+<![CDATA[ <p>主播｜Even 冷场王 麦壳</p><p>电子游戏乃学生家长之一生之敌，游戏机更是如同过街老鼠一般人人喊打。</p><p>不知道大家小时候是否都有过偷藏游戏机的经历？</p><p>学生时期都是如何偷偷玩游戏的呢？</p><p>玩游戏被父母发现后有什么牛皮的经历吗？</p><p>今天《游戏开始》的三位常驻主播：裤裆战神（Even）、合同达人（冷场王）以及地下索粉（麦壳）将给大家精彩讲述他们小时候与家长们极限拉扯的经历，现场爆笑不断状态频出，欢迎大家点击收听！</p> ]]>
+</content:encoded>
+<itunes:duration>01:24:21</itunes:duration>
+</item>
+</channel>
+</rss>
+        `;
+        // -----------------------------------------------------------
+
+
         const elements = {
             title: document.getElementById('podcast-title'),
             subtitle: document.getElementById('podcast-subtitle'),
@@ -199,7 +1248,7 @@
             playerTitle: document.getElementById('player-episode-title')
         };
 
-        // --- 播放器控制 ---
+        // --- 播放器控制 (保持不变) ---
         function showPlayer() {
             elements.audioPlayerContainer.style.transform = 'translateY(0)';
             elements.audioPlayerContainer.style.opacity = '1';
@@ -217,19 +1266,64 @@
             elements.playerTitle.textContent = title;
             elements.audioPlayer.src = audioUrl;
             showPlayer();
-            // 在 src 设置后稍作延迟播放，确保资源加载
             setTimeout(() => elements.audioPlayer.play(), 100); 
         }
 
-        // --- 辅助函数 ---
+        // --- 描述展开/折叠功能 (已修复) ---
+        function toggleDescription(descId, buttonId) {
+            const desc = document.getElementById(descId);
+            const button = document.getElementById(buttonId);
+            
+            // CSS transition duration is 0.5s
+            const transitionDuration = 500; 
+            // Target collapsed height defined in CSS is 4.875em
+            const collapsedHeight = '4.875em';
+            
+            if (desc.classList.contains('description-collapsed')) {
+                // 状态: EXPAND (从折叠到展开)
+                
+                // 1. 移除折叠类和目标高度
+                desc.classList.remove('description-collapsed');
+                desc.classList.add('description-expanded'); // 标记为已展开
+                
+                // 2. 设置 max-height 为实际内容高度，触发平滑展开
+                // 注意：scrollHeight 必须在移除 .description-collapsed 之后获取，但我们这里先移除类，CSS max-height: 4.875em 失效，
+                // 然后设置 scrollHeight，让 transition 从 4.875em 移动到 scrollHeight
+                desc.style.maxHeight = desc.scrollHeight + "px";
+                
+                // 3. 动画完成后清除 inline max-height，允许内容动态重排
+                setTimeout(() => {
+                    // 确保在清除前，用户没有再次点击收起
+                    if (desc.classList.contains('description-expanded')) {
+                         desc.style.maxHeight = '';
+                    }
+                }, transitionDuration + 50); // 略大于过渡时间
 
-        /**
-         * 格式化日期字符串
-         */
+                button.textContent = '收起内容 (折叠)';
+
+            } else {
+                // 状态: COLLAPSE (从展开到折叠)
+
+                // 1. 确保当前 max-height 是完整的 scrollHeight，为收缩动画提供起始点
+                // 这一步在展开后可能已经被清除了 (maxHeight = ''), 所以需要重新设置
+                desc.style.maxHeight = desc.scrollHeight + "px"; 
+                
+                // 2. 强制浏览器重绘 (reflow) 以确保步骤 1 生效
+                desc.offsetHeight; 
+
+                // 3. 立即将 max-height 设置为折叠目标高度，触发收缩过渡
+                desc.style.maxHeight = collapsedHeight; 
+                desc.classList.add('description-collapsed');
+                desc.classList.remove('description-expanded');
+
+                button.textContent = '显示全部 (展开)';
+            }
+        }
+        
+        // --- 辅助函数 (保持不变) ---
         function formatDate(dateString) {
             try {
                 const date = new Date(dateString);
-                // 像素风格的日期格式 (YYYY-MM-DD)
                 const y = date.getFullYear();
                 const m = String(date.getMonth() + 1).padStart(2, '0');
                 const d = String(date.getDate()).padStart(2, '0');
@@ -239,9 +1333,6 @@
             }
         }
 
-        /**
-         * 解析 XML 字符串并返回 DOM 对象
-         */
         function parseXml(xmlString) {
             try {
                 const parser = new DOMParser();
@@ -252,30 +1343,42 @@
             }
         }
 
-        // --- 渲染函数 ---
-
-        /**
-         * 渲染单个剧集卡片
-         */
+        // --- 渲染函数 (已修改以支持展开/折叠) ---
         function renderEpisode(episode, index) {
             const card = document.createElement('div');
-            // 像素风格：直角，粗边框，黑底白字
             card.className = 'bg-white p-6 shadow-lg fade-in border-4 border-black';
             card.style.animationDelay = `${0.3 + index * 0.1}s`;
 
-            // HTML 实体转义（如果描述中有 HTML 标签或实体，需要处理）
-            const cleanDescription = episode.description
-                .replace(/<[^>]*>?/gm, '') // 移除 HTML 标签
-                .substring(0, 200) + (episode.description.length > 200 ? '...' : '');
+            // 提取纯文本描述
+            const fullDescription = episode.description.replace(/<[^>]*>?/gm, ''); 
+            // 检查内容是否足够长，需要折叠（以 150 字符为界限）
+            const needsToggle = fullDescription.length > 150;
+
+            // 初始状态：如果需要折叠，则应用 description-collapsed 类
+            const initialClass = needsToggle ? 'description-collapsed' : 'description-expanded';
 
             card.innerHTML = `
                 <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between space-y-4 lg:space-y-0">
                     <div class="flex-1 min-w-0 pr-4">
                         <h3 class="text-xl font-bold text-black border-b-2 border-dotted border-gray-400 mb-1">${index + 1}. ${episode.title}</h3>
                         <p class="text-sm text-red-700 font-bold mb-3">日期: ${episode.pubDate}</p>
-                        <p class="text-gray-700 text-sm line-clamp-2">${cleanDescription || '数据载入中...'}</p>
+                        
+                        <!-- 描述容器 -->
+                        <div id="desc-${index}" class="text-gray-700 text-sm leading-relaxed ${initialClass}">
+                            ${fullDescription || '数据载入中...'}
+                        </div>
+                        
+                        <!-- 展开/折叠按钮，只在需要折叠时显示 -->
+                        ${needsToggle ? `
+                            <button id="toggle-btn-${index}" 
+                                class="text-red-500 hover:text-black text-sm font-bold mt-2 underline transition-colors duration-150"
+                                onclick="toggleDescription('desc-${index}', 'toggle-btn-${index}')"
+                            >
+                                显示全部 (展开)
+                            </button>` 
+                        : ''}
                     </div>
-                    <!-- 播放按钮使用 game-button 和 play-button 样式 --><button 
+                    <button 
                         class="game-button play-button text-white flex items-center px-4 py-2 text-sm font-bold whitespace-nowrap"
                         onclick="playEpisode('${episode.title.replace(/'/g, "\\'")}', '${episode.audioUrl}')"
                     >
@@ -287,86 +1390,103 @@
             elements.episodesContainer.appendChild(card);
         }
 
-        // --- 主逻辑 ---
+        // --- 主逻辑 (已修复：移除倒序排列) ---
         async function loadPodcastFeed() {
             elements.loadingSpinner.classList.remove('hidden');
             elements.errorMessage.classList.add('hidden');
             elements.episodesContainer.innerHTML = '';
             
-            const MAX_RETRIES = 3;
-            let delay = 1000; 
+            let xmlString = HARDCODED_XML.trim();
 
-            for (let i = 0; i < MAX_RETRIES; i++) {
+            if (!xmlString) {
+                // 如果用户没有粘贴 XML，则退回到尝试直接请求 (但预期会因 CORS 失败)
+                console.warn("HARDCODED_XML 变量为空。尝试直接请求 RSS Feed，但预期会因 CORS 策略失败。");
                 try {
-                    const encodedFeedUrl = encodeURIComponent(RSS_FEED_URL);
-                    const proxyUrl = CORS_PROXY + encodedFeedUrl;
-                    
-                    const response = await fetch(proxyUrl);
-
+                    const response = await fetch(RSS_FEED_URL);
                     if (!response.ok) {
-                        throw new Error(`网络请求失败，状态码: ${response.status}`);
+                         // 如果直接请求失败，直接抛出错误
+                        throw new Error(`直接请求失败，状态码: ${response.status}。请确保已粘贴 XML 内容。`);
                     }
-
-                    const xmlString = await response.text(); 
-                    const xmlDoc = parseXml(xmlString);
-                    
-                    if (!xmlDoc || xmlDoc.getElementsByTagName('parsererror').length > 0) {
-                        throw new Error("XML 解析错误。");
-                    }
-
-                    const channel = xmlDoc.querySelector('channel');
-
-                    // 1. 播客元数据
-                    const podcastTitle = channel.querySelector('title')?.textContent || '游戏开始';
-                    const podcastSubtitle = channel.querySelector('itunes\\:subtitle, subtitle')?.textContent || '按下 START 键';
-                    const podcastDescription = channel.querySelector('description')?.textContent || '数据读取中...';
-
-                    elements.title.textContent = podcastTitle;
-                    elements.subtitle.textContent = podcastSubtitle;
-                    elements.description.innerHTML = podcastDescription.replace(/<[^>]*>?/gm, '');
-
-                    // 2. 剧集列表
-                    const items = channel.querySelectorAll('item');
-                    let episodes = [];
-
-                    items.forEach(item => {
-                        const title = item.querySelector('title')?.textContent;
-                        const pubDate = item.querySelector('pubDate')?.textContent;
-                        const enclosure = item.querySelector('enclosure');
-                        const audioUrl = enclosure ? enclosure.getAttribute('url') : null;
-                        const description = item.querySelector('description')?.textContent || item.querySelector('itunes\\:summary, summary')?.textContent;
-                        
-                        if (title && audioUrl) {
-                            episodes.push({
-                                title: title,
-                                pubDate: formatDate(pubDate),
-                                audioUrl: audioUrl,
-                                description: description
-                            });
-                        }
-                    });
-                    
-                    if (episodes.length === 0) {
-                        elements.episodesContainer.innerHTML = '<p class="text-black text-center py-8 font-bold border-4 border-black bg-white">!! 任务列表为空 (E-00) !!</p>';
-                    } else {
-                        episodes.forEach((ep, index) => renderEpisode(ep, index));
-                    }
-                    
-                    elements.loadingSpinner.classList.add('hidden');
-                    return; 
-
+                    xmlString = await response.text();
                 } catch (error) {
-                    console.error(`尝试加载失败 (重试 ${i + 1}/${MAX_RETRIES})`, error);
-                    if (i === MAX_RETRIES - 1) {
-                        elements.errorMessage.classList.remove('hidden');
-                        elements.episodesContainer.innerHTML = '';
-                        elements.loadingSpinner.classList.add('hidden');
-                        return; 
-                    }
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    delay *= 2; 
+                    console.error("无法加载播客数据。请将 XML 粘贴到 HARDCODED_XML 变量中。", error);
+                    elements.errorMessage.classList.remove('hidden');
+                    elements.loadingSpinner.classList.add('hidden');
+                    return;
                 }
-            } 
+            }
+
+            // 使用获取到的 XML 字符串进行解析和渲染
+            try {
+                const xmlDoc = parseXml(xmlString);
+                
+                if (!xmlDoc || xmlDoc.getElementsByTagName('parsererror').length > 0) {
+                    // 检查 XML 解析错误
+                    throw new Error("XML 解析错误。请检查您粘贴的 XML 内容格式是否正确。");
+                }
+
+                // **注意**：XML 中的根元素是 `<rss>`，我们需要找到 `<channel>`
+                const channel = xmlDoc.querySelector('channel');
+
+                if (!channel) {
+                    throw new Error("XML 结构不完整，未找到 <channel> 标签。");
+                }
+
+
+                // 1. 播客元数据
+                const podcastTitle = channel.querySelector('title')?.textContent || '游戏开始';
+                // 播客源没有 itunes:subtitle 标签，使用 link 标签的标题作为副标题的候选，否则使用默认值
+                const podcastDescriptionRaw = channel.querySelector('description')?.textContent || '数据读取中...';
+                const podcastSubtitle = podcastDescriptionRaw.substring(0, 50) + (podcastDescriptionRaw.length > 50 ? '...' : ''); 
+                const podcastDescription = podcastDescriptionRaw;
+
+                elements.title.textContent = podcastTitle;
+                elements.subtitle.textContent = podcastSubtitle;
+                // 去除描述中的所有 HTML 标签
+                elements.description.innerHTML = podcastDescription.replace(/<[^>]*>?/gm, '');
+
+                // 2. 剧集列表
+                const items = channel.querySelectorAll('item');
+                let episodes = [];
+
+                items.forEach(item => {
+                    const title = item.querySelector('title')?.textContent;
+                    const pubDate = item.querySelector('pubDate')?.textContent;
+                    const enclosure = item.querySelector('enclosure');
+                    const audioUrl = enclosure ? enclosure.getAttribute('url') : null;
+                    
+                    // 优先使用 <content:encoded>，否则使用 <description>
+                    // 由于 <content:encoded> 带有命名空间，我们直接在 item 节点下查找 description
+                    const descriptionElement = item.querySelector('description');
+                    const description = descriptionElement ? descriptionElement.textContent : '';
+
+
+                    if (title && audioUrl) {
+                        episodes.push({
+                            title: title,
+                            pubDate: formatDate(pubDate),
+                            audioUrl: audioUrl,
+                            description: description
+                        });
+                    }
+                });
+                
+                if (episodes.length === 0) {
+                    elements.episodesContainer.innerHTML = '<p class="text-black text-center py-8 font-bold border-4 border-black bg-white">!! 任务列表为空 (E-00) !!</p>';
+                } else {
+                    // ** FIX: 移除 episodes.reverse() **
+                    // 按照 XML 顺序渲染，通常是按发布时间倒序排列 (最新的在最前，符合用户默认认知)
+                    episodes.forEach((ep, index) => renderEpisode(ep, index));
+                }
+                
+                elements.loadingSpinner.classList.add('hidden');
+
+            } catch (error) {
+                console.error("渲染播客数据失败:", error);
+                elements.errorMessage.classList.remove('hidden');
+                elements.errorMessage.querySelector('span').textContent = `无法处理数据。原因: ${error.message}`;
+                elements.loadingSpinner.classList.add('hidden');
+            }
         }
 
         // 页面加载完成后执行
