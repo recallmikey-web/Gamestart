@@ -121,13 +121,34 @@
             opacity: 0.08; /* 非常低的透明度，提供微妙的纹理 */
             mix-blend-mode: multiply; 
         }
+        
+        /* 新增：剧集描述折叠样式 */
+        .description-collapsed {
+            max-height: 4.875em; /* 约 3 行文本的高度 (line-height: relaxed ≈ 1.625 * 3) */
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+            position: relative;
+        }
+        .description-collapsed::after {
+            /* 渐变遮罩，提示内容被截断 */
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1.5em; 
+            background: linear-gradient(to top, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
+        }
+        .description-expanded::after {
+            content: none; /* 展开时移除遮罩 */
+        }
 
     </style>
 </head>
 <body>
 
     <div id="app" class="min-h-screen flex flex-col items-center p-4">
-        <!-- 主容器 --><!-- Header 添加了 pixel-art-background 类 --><header class="w-full bg-white shadow-xl p-6 lg:p-10 mb-8 rounded-none border-4 border-black pixel-art-background">
+        <!-- 主容器 --><header class="w-full bg-white shadow-xl p-6 lg:p-10 mb-8 rounded-none border-4 border-black pixel-art-background">
             <!-- 内容恢复为图标和文字居中排列 --><div class="max-w-4xl mx-auto flex flex-col lg:flex-row items-center justify-center space-y-4 lg:space-y-0">
                 <div class="flex flex-col items-center justify-center space-y-4">
                     <!-- 播客图标 - w-32 h-32 固定大小 --><div class="w-32 h-32 bg-gray-900 flex items-center justify-center shadow-lg border-4 border-black overflow-hidden relative z-10">
@@ -1250,6 +1271,27 @@
             setTimeout(() => elements.audioPlayer.play(), 100); 
         }
 
+        // --- 描述展开/折叠功能 (新增) ---
+        function toggleDescription(descId, buttonId) {
+            const desc = document.getElementById(descId);
+            const button = document.getElementById(buttonId);
+            
+            if (desc.classList.contains('description-collapsed')) {
+                // 展开: 移除折叠类，并设置 max-height 为实际内容高度
+                desc.style.maxHeight = desc.scrollHeight + "px";
+                desc.classList.remove('description-collapsed');
+                desc.classList.add('description-expanded');
+                button.textContent = '收起内容 (折叠)';
+            } else {
+                // 折叠: 先设置一个固定的高度，然后添加折叠类，让 CSS transition 生效
+                desc.style.maxHeight = desc.scrollHeight + "px"; 
+                desc.classList.add('description-collapsed');
+                desc.classList.remove('description-expanded');
+                // 确保在下一个渲染周期恢复到 CSS 定义的 max-height (4.875em)
+                // 浏览器会自动处理这里的 CSS 属性变化，触发平滑过渡
+                button.textContent = '显示全部 (展开)';
+            }
+        }
         // --- 辅助函数 (保持不变) ---
         function formatDate(dateString) {
             try {
@@ -1273,23 +1315,37 @@
             }
         }
 
-        // --- 渲染函数 (保持不变) ---
+        // --- 渲染函数 (已修改以支持展开/折叠) ---
         function renderEpisode(episode, index) {
             const card = document.createElement('div');
             card.className = 'bg-white p-6 shadow-lg fade-in border-4 border-black';
             card.style.animationDelay = `${0.3 + index * 0.1}s`;
 
-            // 清除 HTML/CDATA 标签，并截断描述
-            const cleanDescription = episode.description
-                .replace(/<[^>]*>?/gm, '') 
-                .substring(0, 200) + (episode.description.length > 200 ? '...' : '');
+            // 提取纯文本描述
+            const fullDescription = episode.description.replace(/<[^>]*>?/gm, ''); 
+            // 检查内容是否足够长，需要折叠（以 150 字符为界限）
+            const needsToggle = fullDescription.length > 150;
 
             card.innerHTML = `
                 <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between space-y-4 lg:space-y-0">
                     <div class="flex-1 min-w-0 pr-4">
                         <h3 class="text-xl font-bold text-black border-b-2 border-dotted border-gray-400 mb-1">${index + 1}. ${episode.title}</h3>
                         <p class="text-sm text-red-700 font-bold mb-3">日期: ${episode.pubDate}</p>
-                        <p class="text-gray-700 text-sm line-clamp-2">${cleanDescription || '数据载入中...'}</p>
+                        
+                        <!-- 描述容器，如果需要折叠则加上 collapsed 类 -->
+                        <div id="desc-${index}" class="text-gray-700 text-sm leading-relaxed ${needsToggle ? 'description-collapsed' : ''} ${needsToggle ? '' : 'description-expanded'}">
+                            ${fullDescription || '数据载入中...'}
+                        </div>
+                        
+                        <!-- 展开/折叠按钮，只在需要折叠时显示 -->
+                        ${needsToggle ? `
+                            <button id="toggle-btn-${index}" 
+                                class="text-red-500 hover:text-black text-sm font-bold mt-2 underline transition-colors duration-150"
+                                onclick="toggleDescription('desc-${index}', 'toggle-btn-${index}')"
+                            >
+                                显示全部 (展开)
+                            </button>` 
+                        : ''}
                     </div>
                     <button 
                         class="game-button play-button text-white flex items-center px-4 py-2 text-sm font-bold whitespace-nowrap"
@@ -1349,8 +1405,9 @@
                 // 1. 播客元数据
                 const podcastTitle = channel.querySelector('title')?.textContent || '游戏开始';
                 // 播客源没有 itunes:subtitle 标签，使用 link 标签的标题作为副标题的候选，否则使用默认值
-                const podcastSubtitle = channel.querySelector('description')?.textContent.substring(0, 50) || '按下 START 键 (静态)'; 
-                const podcastDescription = channel.querySelector('description')?.textContent || '数据读取中...';
+                const podcastDescriptionRaw = channel.querySelector('description')?.textContent || '数据读取中...';
+                const podcastSubtitle = podcastDescriptionRaw.substring(0, 50) + (podcastDescriptionRaw.length > 50 ? '...' : ''); 
+                const podcastDescription = podcastDescriptionRaw;
 
                 elements.title.textContent = podcastTitle;
                 elements.subtitle.textContent = podcastSubtitle;
@@ -1367,7 +1424,7 @@
                     const enclosure = item.querySelector('enclosure');
                     const audioUrl = enclosure ? enclosure.getAttribute('url') : null;
                     
-                    // 优先使用 <content:encoded>（因为它通常包含完整内容），否则使用 <description>
+                    // 优先使用 <content:encoded>，否则使用 <description>
                     // 由于 <content:encoded> 带有命名空间，我们直接在 item 节点下查找 description
                     const descriptionElement = item.querySelector('description');
                     const description = descriptionElement ? descriptionElement.textContent : '';
@@ -1386,7 +1443,8 @@
                 if (episodes.length === 0) {
                     elements.episodesContainer.innerHTML = '<p class="text-black text-center py-8 font-bold border-4 border-black bg-white">!! 任务列表为空 (E-00) !!</p>';
                 } else {
-                    episodes.forEach((ep, index) => renderEpisode(ep, index));
+                    // 倒序渲染，确保最新的剧集在最上方
+                    episodes.reverse().forEach((ep, index) => renderEpisode(ep, index));
                 }
                 
                 elements.loadingSpinner.classList.add('hidden');
