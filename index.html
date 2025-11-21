@@ -6,11 +6,17 @@
     <title>游戏开始 - 播客官网</title>
     <!-- 引入 Tailwind CSS CDN --><script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* 采用通用且粗犷的字体，并通过CSS模拟像素效果 */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@800&display=swap');
+        /*
+        【访问优化】
+        1. 已移除 Google Fonts (@import url...)。
+        2. 采用本地系统字体栈，确保中文和英文都能快速加载，避免因 Google 被屏蔽而导致页面样式阻塞。
+        3. 注意：Tailwind CSS CDN (cdn.tailwindcss.com) 在中国大陆地区可能不稳定或缓慢，
+           如果问题持续，建议将 Tailwind 编译到本地，或将 CDN 替换为国内镜像。
+        */
         
         body {
-            font-family: 'Inter', sans-serif;
+            /* 采用更通用的系统字体栈，兼容中文字体，确保快速加载 */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
             /* 亮黄色背景 */
             background-color: #FEE000;
             color: #000000; /* 纯黑色文本 */
@@ -184,6 +190,12 @@
     </div>
 
     <script>
+        // 【中国访问优化建议】
+        // 1. RSS_FEED_URL: 'https://feed.xyzfm.space/n9bfbdmbbqam' 这个地址可能在中国大陆被屏蔽。
+        //    请确保您的播客托管方在中国境内有可用的 CDN 或镜像服务。
+        // 2. CORS_PROXY: 'https://corsproxy.io/?' 这个代理服务可能不稳定或在中国被屏蔽。
+        //    若无法访问，最好的解决方案是在您自己的服务器上搭建一个简单的转发代理。
+
         const RSS_FEED_URL = 'https://feed.xyzfm.space/n9bfbdmbbqam';
         const CORS_PROXY = 'https://corsproxy.io/?'; 
         
