@@ -3,239 +3,305 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>游戏开始 - 播客官网</title>
+    <title>游戏开始丨GAME START - 播客官网</title>
     <!-- 引入 Tailwind CSS CDN --><script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Google Fonts - 一个更具科技感的字体和一个像素字体 --><link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-        /*
-        【中国访问优化 - 最终方案】
-        1. 移除所有外部代理。
-        2. 使用 HARDCODED_XML 变量缓存 RSS 内容，实现离线/静态展示，彻底解决中国大陆的网络屏蔽和 CORS 跨域问题。
-        */
-        
+        /* 自定义 Tailwind 配置以支持中文和游戏主题色 */
+        :root {
+            --primary-color: #00ff99; /* 霓虹绿 */
+            --accent-color: #00cc88;
+            --secondary-color: #ff33cc; /* 霓虹粉 */
+            --text-light: #e0e0e0;
+            --bg-dark: #121212;
+            --bg-medium: #1e1e1e;
+            --border-color: #333333;
+        }
+
         body {
-            /* 采用更通用的系统字体栈，兼容中文字体，确保快速加载 */
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-            /* 亮黄色背景 */
-            background-color: #FEE000;
-            color: #000000; /* 纯黑色文本 */
-            
-            /* 明显的像素点背景图案 */
-            background-image: linear-gradient(to right, #FFD700 1px, transparent 1px), 
-                              linear-gradient(to bottom, #FFD700 1px, transparent 1px);
-            background-size: 10px 10px; /* 更细密的像素网格 */
+            font-family: 'Chakra Petch', 'Microsoft YaHei', 'SimHei', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            overflow-x: hidden; /* 防止横向滚动条 */
         }
 
-        /* 移除所有元素的默认圆角，强制像素化风格 */
-        .rounded-xl, .rounded-lg, .rounded-full {
-            border-radius: 0 !important;
+        h1, h2, h3 {
+            font-family: 'Chakra Petch', sans-serif;
         }
 
-        /* 自定义滚动条样式 - 保持像素风格的方正 */
-        .episode-list::-webkit-scrollbar {
-            width: 10px;
-        }
-        .episode-list::-webkit-scrollbar-thumb {
-            background-color: #333; /* 黑色滚动条 */
-            border-radius: 0;
-        }
-        .episode-list::-webkit-scrollbar-track {
-            background-color: #aaa;
-            border-radius: 0;
+        .pixel-font {
+            font-family: 'Press Start 2P', cursive;
+            letter-spacing: 2px; /* 增加像素字体间距 */
         }
 
-        /* 动画效果 - 保持简单淡入 */
-        .fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
-            opacity: 0;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* 播客标题的像素化特殊效果 */
-        #podcast-title {
-            font-size: 2.5rem; /* 增大字体 */
-            font-weight: 900;
-            /* 经典 8-bit 描边效果：多重阴影模拟厚边框 */
-            text-shadow: 
-                -3px -3px 0 #333,
-                 3px -3px 0 #333,
-                -3px  3px 0 #333,
-                 3px  3px 0 #333,
-                4px 4px 0 #f00; /* 底部和右侧的红色阴影，增加冲击力 */
-            color: #fff; /* 白色内填充 */
-        }
-
-        /* 8-bit 风格的按钮 */
-        .game-button {
-            background-color: #FF0000; /* 红色按钮 */
-            color: #FFFFFF; /* 白色文字 */
-            border: 4px solid #000000; /* 粗黑边框 */
-            box-shadow: 4px 4px 0 0 #333; /* 模拟深色边框的阴影 */
-            transform: translateY(0);
-            transition: all 0.05s linear; /* 线性过渡，更生硬 */
-            padding: 10px 20px;
-            font-weight: 800;
-        }
-        .game-button:hover {
-            background-color: #CC0000; /* 悬停时颜色变暗 */
-            box-shadow: 6px 6px 0 0 #333;
-        }
-        .game-button:active {
-            box-shadow: 0 0 0 0 #333; /* 移除阴影 */
-            transform: translate(4px, 4px); /* 完全下沉 */
-        }
-
-        /* 剧集播放按钮的特殊样式 */
-        .play-button {
-            background-color: #008000; /* 绿色按钮 */
-        }
-        .play-button:hover {
-             background-color: #006400; /* 悬停时绿色变深 */
-        }
-
-        /* --- 静态斜线像素背景样式 --- */
-        .pixel-art-background {
-            position: relative; /* 允许伪元素定位 */
-            overflow: hidden; /* 隐藏超出部分的像素 */
-            background-color: #fff; /* 原有的白色背景 */
-        }
-
-        .pixel-art-background::before {
+        /* 渐变背景叠加层，增加深度 */
+        body::before {
             content: '';
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            /* 静态斜线网格图案 (45度) */
-            background-image: repeating-linear-gradient(
-                45deg,
-                #000000 0,
-                #000000 5px,
-                transparent 5px,
-                transparent 10px
-            );
-            background-size: 20px 20px; /* 控制图案重复的大小 */
-            opacity: 0.08; /* 非常低的透明度，提供微妙的纹理 */
-            mix-blend-mode: multiply; 
+            background: radial-gradient(circle at top left, rgba(0, 255, 153, 0.1) 0%, transparent 40%),
+                        radial-gradient(circle at bottom right, rgba(255, 51, 204, 0.1) 0%, transparent 40%);
+            z-index: -1;
+            opacity: 0.6;
         }
-        
-        /* 新增：剧集描述折叠样式 */
-        .description-collapsed {
-            /* 约 3 行文本的高度 (line-height: relaxed ≈ 1.625 * 3) */
-            max-height: 4.875em; 
+
+        /* 霓虹发光效果 */
+        .neon-text-green {
+            text-shadow: 0 0 5px var(--primary-color), 0 0 10px var(--primary-color), 0 0 15px var(--primary-color);
+        }
+        .neon-text-pink {
+            /* 为粉色文本添加霓虹效果 */
+            text-shadow: 0 0 5px var(--secondary-color), 0 0 10px var(--secondary-color), 0 0 15px var(--secondary-color);
+        }
+        .neon-border-green {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 8px rgba(0, 255, 153, 0.7);
+        }
+        .neon-border-pink {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 8px rgba(255, 51, 204, 0.7);
+        }
+        .neon-glow-green:hover {
+            box-shadow: 0 0 15px var(--primary-color), 0 0 25px var(--primary-color);
+            transform: scale(1.02);
+        }
+        .neon-glow-pink:hover {
+            box-shadow: 0 0 15px var(--secondary-color), 0 0 25px var(--secondary-color);
+            transform: scale(1.02);
+        }
+
+        /* 按钮的基础样式 (包括播放按钮和播放器内的控制按钮) */
+        .play-button {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* 弹跳效果 */
+            transform: scale(1);
+        }
+        .play-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 255, 153, 0.8);
+        }
+        .play-button:active {
+            transform: scale(0.95);
+        }
+        /* 小宇宙收听按钮使用不同的主题色 */
+        #podcastLink {
+            box-shadow: 0 0 15px rgba(255, 51, 204, 0.8); /* 默认粉色阴影 */
+        }
+
+
+        /* 底部播放器占据空间，防止内容被遮挡 */
+        main {
+            padding-bottom: 120px; /* 至少比播放器高度高 */
+        }
+
+        /* 模拟像素点阵背景纹理 */
+        .pixel-grid-bg {
+            background-image: linear-gradient(0deg, transparent 9px, rgba(255,255,255,0.05) 10px),
+                              linear-gradient(90deg, transparent 9px, rgba(255,255,255,0.05) 10px);
+            background-size: 10px 10px;
+        }
+
+        /* 剧集卡片样式修改：改为深蓝灰色渐变 */
+        .episode-card {
+            transition: all 0.3s ease-in-out;
+            /* 1. 修改背景色为深蓝灰色渐变，更接近网站整体色调 */
+            background: linear-gradient(135deg, rgba(15, 25, 45, 0.9), rgba(10, 20, 40, 0.9));
+            border: 1px solid var(--border-color);
+        }
+        .episode-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 255, 153, 0.2), 0 4px 8px rgba(0, 255, 153, 0.1);
+        }
+
+        /* 描述内容容器的 CSS */
+        .desc-container {
+            max-height: 100px; /* 初始截断高度 */
             overflow: hidden;
             transition: max-height 0.5s ease-in-out;
+            margin-top: 0.5rem;
             position: relative;
         }
-        .description-collapsed::after {
-            /* 渐变遮罩，提示内容被截断 */
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 1.5em; 
-            /* 遮罩颜色与卡片背景色 (白色) 一致 */
-            background: linear-gradient(to top, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0) 100%);
+        /* 增加展开时的过渡效果，解决跳动问题 */
+        .desc-container.expanded {
+            max-height: 1000px; /* 足够大，以显示全部内容 */
         }
-        /* 展开时不需要移除遮罩，因为展开时会移除 .description-collapsed 类，自动移除 ::after */
+        
+        /* 为了让 HTML 内容中的 <p> 标签样式更好看 */
+        .desc-container p {
+            margin-bottom: 0.5rem;
+        }
 
+        /* Custom progress bar styling for neon theme */
+        #progressBar {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            background: var(--border-color); /* Track color */
+            border-radius: 4px;
+            margin: 0; /* Remove default margin */
+            padding: 0; /* Remove default padding */
+        }
+
+        /* Progress Bar Thumb (Handle) style */
+        #progressBar::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            box-shadow: 0 0 8px var(--primary-color);
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+
+        #progressBar::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            box-shadow: 0 0 8px var(--primary-color);
+            border: none;
+        }
     </style>
 </head>
-<body>
+<body class="pixel-grid-bg">
 
-    <div id="app" class="min-h-screen flex flex-col items-center p-4">
-        <!-- 主容器 --><header class="w-full bg-white shadow-xl p-6 lg:p-10 mb-8 rounded-none border-4 border-black pixel-art-background">
-            <!-- 内容恢复为图标和文字居中排列 --><div class="max-w-4xl mx-auto flex flex-col lg:flex-row items-center justify-center space-y-4 lg:space-y-0">
-                <div class="flex flex-col items-center justify-center space-y-4">
-                    <!-- 播客图标 - w-32 h-32 固定大小 --><div class="w-32 h-32 bg-gray-900 flex items-center justify-center shadow-lg border-4 border-black overflow-hidden relative z-10">
-                        <!-- 使用用户提供的 URL --><img src="https://image.xyzcdn.net/Fgsz78ncyuMncuAXKjAvOL-IW9wv.png" 
-                             alt="播客封面图" 
-                             class="w-full h-full object-cover p-1"
-                             onerror="this.onerror=null; this.src='https://placehold.co/128x128/333/fff?text=ICON+ERROR'">
-                    </div>
-                    <div class="relative z-10"> <!-- 确保文字在动画上方 --><h1 id="podcast-title" class="text-3xl text-center font-extrabold text-gray-900">游戏开始</h1>
-                        <p id="podcast-subtitle" class="text-base text-center text-black font-bold mt-2 border-b-2 border-black pb-1">按下 START 键</p>
-                    </div>
+    <!-- 顶栏/导航栏 (固定) -->
+    <!-- 添加 id="top" 以便平滑滚动 -->
+    <header id="top" class="sticky top-0 z-20 bg-gradient-to-b from-gray-900/90 to-transparent backdrop-blur-sm border-b border-gray-700/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <h1 class="text-3xl font-extrabold text-white tracking-wide pixel-font neon-text-green">
+                GAME START <span class="text-secondary-color neon-text-pink">|</span> 游戏开始
+            </h1>
+            <!-- 链接改为 #top 并添加 JavaScript 滚动函数 -->
+            <a href="#" id="scrollToTopBtn"
+               class="text-sm font-medium text-primary-color hover:text-secondary-color transition duration-150 ease-in-out hidden sm:block pixel-font">
+                // TOP
+            </a>
+        </div>
+    </header>
+
+    <!-- 主内容区域 --><main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
+
+        <!-- 播客头部/英雄区 - 更具冲击力 --><section class="relative flex flex-col md:flex-row items-center space-y-8 md:space-y-0 md:space-x-12 mb-16 p-8 md:p-12 bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl shadow-xl border-2 border-primary-color/50 neon-border-green">
+            
+            <!-- 封面图 - 带有发光边框 --><div class="flex-shrink-0 w-full md:w-64 relative">
+                <img id="podcastImage"
+                     src="https://image.xyzcdn.net/Fgsz78ncyuMncuAXKjAvOL-IW9wv.png"
+                     alt="[游戏开始播客封面]"
+                     class="w-full h-auto rounded-xl object-cover border-4 border-secondary-color neon-border-pink shadow-lg transform rotate-2 hover:rotate-0 transition-transform duration-300"
+                     onerror="this.onerror=null;this.src='https://placehold.co/600x600/00ff99/1e1e1e?text=GAME%0ASTART';">
+                <!-- 额外的装饰边框 --><div class="absolute -inset-2 rounded-xl border-2 border-dashed border-primary-color opacity-30 animate-pulse"></div>
+            </div>
+
+            <!-- 文字介绍 --><div class="flex-grow text-center md:text-left">
+                <h2 class="text-5xl sm:text-6xl font-extrabold text-white mb-4 leading-tight pixel-font neon-text-green">
+                    <span class="block">GAME START</span>
+                    <span class="block text-secondary-color text-4xl sm:text-5xl tracking-normal">丨游戏开始</span>
+                </h2>
+                <p id="podcastDescription" class="text-gray-300 text-lg mb-6 max-w-2xl mx-auto md:mx-0 leading-relaxed">
+                    <span class="text-primary-color font-bold">// STATUS: ACTIVE</span><br>
+                    非专业人员不正规团体与你分享三流游戏生活。<br>
+                    <span class="text-secondary-color">>> 进听友群+v Recallmikey <<</span>
+                </p>
+                <div class="space-y-4 flex flex-col sm:flex-row justify-center md:justify-start sm:space-y-0 sm:space-x-4 mt-6">
+                    <!-- 小宇宙收听链接，文字颜色改为白色 (text-white) 提高对比度 -->
+                    <a id="podcastLink" href="https://www.xiaoyuzhoufm.com/podcast/62de92508c5971a066098311?utm_source=rss" target="_blank"
+                       class="inline-flex items-center px-8 py-3 border border-transparent text-base font-bold rounded-full shadow-lg text-white bg-secondary-color hover:bg-primary-color focus:outline-none focus:ring-4 focus:ring-secondary-color focus:ring-opacity-75 transition duration-200 ease-in-out play-button neon-glow-pink pixel-font">
+                        <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
+                        </svg>
+                        [小宇宙收听]
+                    </a>
+                    <p class="text-sm text-gray-400 flex items-center justify-center md:justify-start">
+                        <span class="font-bold mr-2 text-primary-color">制作人:</span><span id="podcastAuthor">陈宜文 冷场王 麦壳</span>
+                    </p>
                 </div>
             </div>
-        </header>
+        </section>
 
-        <main class="max-w-4xl w-full px-2 mb-12">
-            <!-- 播客简介 --><section class="bg-white p-6 rounded-none shadow-lg mb-8 fade-in border-4 border-black" style="animation-delay: 0.1s;">
-                <h2 class="text-xl font-bold mb-3 text-black border-b-2 border-red-500 pb-1">:: 游戏剧情简介 (简介)</h2>
-                <div id="podcast-description" class="text-black leading-relaxed text-sm">
-                    <!-- Loading skeleton --><p class="animate-pulse bg-gray-200 h-4 rounded-none w-full mb-2"></p>
-                    <p class="animate-pulse bg-gray-200 h-4 rounded-none w-5/6"></p>
-                </div>
-            </section>
+        <!-- 剧集列表 --><section id="episodes" class="mb-20">
+            <h3 class="text-4xl font-bold text-white mb-8 border-b-4 border-secondary-color pb-3 pixel-font neon-text-pink">
+                // LATEST EPISODES
+            </h3>
+            <div id="episodeList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- 剧集将通过 JavaScript 渲染到此处 --></div>
+        </section>
 
-            <!-- 剧集列表 --><section class="fade-in" style="animation-delay: 0.2s;">
-                <h2 class="text-xl font-bold mb-4 text-black border-b-2 border-red-500 pb-1">:: 任务日志 (最新剧集)</h2>
+    </main>
+
+    <!-- 固定底部播放器 - 现为自定义控制 --><div id="audioPlayerContainer" class="fixed inset-x-0 bottom-0 bg-gray-900/90 backdrop-blur-md border-t-2 border-primary-color shadow-2xl p-4 hidden z-30">
+        <div class="max-w-7xl mx-auto flex flex-col space-y-3 sm:space-y-0">
+            <!-- 1. 播放器信息和控制区 -->
+            <div class="flex items-center justify-between space-x-6 w-full">
                 
-                <!-- 加载指示器和错误信息 --><div id="loading-spinner" class="flex justify-center items-center py-12 bg-white border-4 border-black shadow-lg">
-                    <svg class="animate-spin -ml-1 mr-3 h-8 w-8 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <rect x="2" y="2" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"/>
-                        <rect x="4" y="4" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"/>
-                        <path class="opacity-75" fill="currentColor" d="M12 4V0C5.373 0 0 5.373 0 12h4zm0 16v4c6.627 0 12-5.373 12-12h-4z"></path>
-                    </svg>
-                    <span class="text-black font-bold">加载中... 请等待数据包。</span>
+                <!-- 标题 (左侧) -->
+                <div class="flex-grow min-w-0 pr-4">
+                    <p class="text-sm font-medium text-primary-color pixel-font">// NOW PLAYING</p>
+                    <p id="nowPlayingTitle" class="text-lg font-semibold text-white truncate pixel-font">请选择一集开始播放</p>
                 </div>
-
-                <div id="error-message" class="hidden bg-red-800 text-white px-4 py-3 border-4 border-black relative" role="alert">
-                    <strong class="font-bold">!! 错误 (E-99) !!</strong>
-                    <span class="block sm:inline">无法连接到服务器。请检查您的网络设置。</span>
+                
+                <!-- 控制按钮 (居中) -->
+                <div class="flex items-center space-x-4">
+                    <button id="playPauseButton" class="text-primary-color hover:text-secondary-color transition duration-150 play-button focus:outline-none" aria-label="Play/Pause">
+                        <!-- Play Icon -->
+                        <svg id="playIcon" class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
+                        </svg>
+                        <!-- Pause Icon (Initially Hidden) -->
+                        <svg id="pauseIcon" class="w-8 h-8 hidden" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 9a1 1 0 00-1 1v2a1 1 0 102 0v-2a1 1 0 00-1-1zm5-1a1 1 0 00-1 1v4a1 1 0 102 0v-4a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
                 </div>
-
-                <!-- 剧集列表容器 --><div id="episodes-container" class="space-y-4 episode-list">
-                    <!-- 剧集卡片将由 JavaScript 填充 --></div>
-            </section>
-        </main>
-
-        <!-- 浮动播放器 --><div id="audio-player-container" class="fixed bottom-0 left-0 right-0 p-4 bg-gray-900 text-white shadow-2xl transform translate-y-full transition-transform duration-300 ease-in-out z-50 rounded-none border-t-4 border-red-500" style="opacity: 0;">
-            <div class="max-w-4xl mx-auto flex items-center justify-between">
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-bold truncate" id="player-episode-title">未选择任务 (剧集)</p>
-                    <audio id="audio-player" controls class="w-full mt-2 bg-transparent"></audio>
+                
+                <!-- 时间显示 (右侧) -->
+                <div id="timeDisplay" class="text-sm text-secondary-color font-mono pixel-font hidden sm:block">
+                    <span id="currentTime">00:00</span> / <span id="durationTime">00:00</span>
                 </div>
-                <button onclick="hidePlayer()" class="ml-4 text-gray-400 hover:text-red-500 transition duration-150">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
             </div>
+            
+            <!-- 2. 进度条 -->
+            <div class="flex items-center w-full">
+                <input type="range" id="progressBar" value="0" min="0" max="100" class="w-full h-2 bg-gray-700 rounded-full cursor-pointer">
+            </div>
+            
+            <!-- Hidden Audio Element for actual playback -->
+            <audio id="podcastAudio" preload="none"></audio>
         </div>
     </div>
 
+    <footer class="bg-gray-900 border-t border-gray-800 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-600 text-sm pixel-font">
+            <p>&copy; 2025 GAME START <span class="text-primary-color">// ALL RIGHTS RESERVED.</span></p>
+            <p>DESIGNED BY GAME START // CODED WITH <span class="text-secondary-color">&hearts;</span></p>
+        </div>
+    </footer>
+
     <script>
-        // 您的 RSS Feed URL，仅用于提示。
-        const RSS_FEED_URL = 'https://feed.xyzfm.space/n9bfbdmbbqam';
-        
-        // -----------------------------------------------------------
-        // !!! 解决中国访问问题的核心：静态 XML 缓存 !!!
-        // -----------------------------------------------------------
-        // 优点：100% 避免 CORS 和 GFW 屏蔽。 
-        // 缺点：内容需要您手动更新。
-        // -----------------------------------------------------------
-        const HARDCODED_XML = `
-<rss xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0">
-<channel>
-<title>游戏开始丨GAME START</title>
-<description>非专业人员不正规团体与你分享三流游戏生活。 进听友群+v Recallmikey</description>
-<itunes:image href="https://image.xyzcdn.net/Fgsz78ncyuMncuAXKjAvOL-IW9wv.png"/>
-<itunes:category text="Leisure"/>
-<language>zh-cn</language>
-<itunes:explicit>true</itunes:explicit>
-<atom:link href="https://feed.xyzfm.space/n9bfbdmbbqam" type="application/rss+xml" rel="self"/>
-<link>https://www.xiaoyuzhoufm.com/podcast/62de92508c5971a066098311?utm_source=rss</link>
-<copyright>陈宜文@小宇宙App</copyright>
-<itunes:author>陈宜文</itunes:author>
-<itunes:owner>
-<itunes:name>陈宜文</itunes:name>
-<itunes:email>306999336@qq.com</itunes:email>
-</itunes:owner>
-<itunes:type>episodic</itunes:type>
+        // =================================================================
+        // 步骤 1: 播客元数据
+        // =================================================================
+        const podcastData = {
+            title: "游戏开始丨GAME START",
+            description: "非专业人员不正规团体与你分享三流游戏生活。 进听友群+v Recallmikey",
+            image: "https://image.xyzcdn.net/Fgsz78ncyuMncuAXKjAvOL-IW9wv.png",
+            author: "陈宜文",
+            copyright: "陈宜文@小宇宙App",
+            link: "https://www.xiaoyuzhoufm.com/podcast/62de92508c5971a066098311?utm_source=rss",
+        };
+
+        // =================================================================
+        // 步骤 2: XML 粘贴区（供您维护）
+        // 系统将根据您粘贴的数量自动解析和渲染 N 个剧集卡片。
+        // =================================================================
+        const rawXmlItems = `
 <item>
 <title>Vol.067 陪媳妇生娃能打游戏吗？</title>
 <enclosure url="https://dts-api.xiaoyuzhoufm.com/track/62de92508c5971a066098311/691d7e246018cc2c9896991a/media.xyzcdn.net/62de92508c5971a066098311/llsOKL3TrMe3xMjzaOaA8diLNUJi.m4a" type="audio/mp4" length="223174635"/>
@@ -1233,264 +1299,379 @@
 </channel>
 </rss>
         `;
-        // -----------------------------------------------------------
 
+        // =================================================================
+        // 步骤 3: XML 解析器 (自动处理，无需修改)
+        // =================================================================
 
-        const elements = {
-            title: document.getElementById('podcast-title'),
-            subtitle: document.getElementById('podcast-subtitle'),
-            description: document.getElementById('podcast-description'),
-            episodesContainer: document.getElementById('episodes-container'),
-            loadingSpinner: document.getElementById('loading-spinner'),
-            errorMessage: document.getElementById('error-message'),
-            audioPlayerContainer: document.getElementById('audio-player-container'),
-            audioPlayer: document.getElementById('audio-player'),
-            playerTitle: document.getElementById('player-episode-title')
-        };
-
-        // --- 播放器控制 (保持不变) ---
-        function showPlayer() {
-            elements.audioPlayerContainer.style.transform = 'translateY(0)';
-            elements.audioPlayerContainer.style.opacity = '1';
+        /**
+         * 使用正则表达式从 XML 字符串中提取标签的文本内容
+         * @param {string} xml XML 片段
+         * @param {string} tagName 标签名 (如 'title', 'pubDate', 'itunes:duration', 'description')
+         * @returns {string} 提取到的内容
+         */
+        function extractTagContent(xml, tagName) {
+            // 匹配标签内容，支持 CDATA (针对 description)
+            const regex = new RegExp(`<${tagName}>(.+?)</${tagName}>`, 's');
+            const match = xml.match(regex);
+            if (match && match[1]) {
+                let content = match[1].trim();
+                // 移除 CDATA 标记
+                content = content.replace(/^<!\[CDATA\[/, '').replace(/\]\]>$/, '').trim();
+                // 移除所有 HTML 标签，只保留纯文本，除非是 description
+                if (tagName !== 'description') {
+                    content = content.replace(/<[^>]*>/g, '').trim();
+                }
+                return content;
+            }
+            return '';
         }
 
-        function hidePlayer() {
-            elements.audioPlayerContainer.style.transform = 'translateY(100%)';
-            elements.audioPlayerContainer.style.opacity = '0';
-            elements.audioPlayer.pause();
-            elements.audioPlayer.src = '';
-            elements.playerTitle.textContent = '未选择任务 (剧集)';
+        /**
+         * 使用正则表达式从 XML 字符串中提取标签属性的值
+         * @param {string} xml XML 片段
+         * @param {string} tagName 标签名 (如 'enclosure')
+         * @param {string} attrName 属性名 (如 'url')
+         * @returns {string} 提取到的属性值
+         */
+        function extractAttribute(xml, tagName, attrName) {
+            // 匹配 <tagName ... attrName="VALUE" ... />
+            const regex = new RegExp(`<${tagName}[^>]*?${attrName}="([^"]*)"`, 's');
+            const match = xml.match(regex);
+            return match && match[1] ? match[1] : '';
         }
 
-        function playEpisode(title, audioUrl) {
-            elements.playerTitle.textContent = title;
-            elements.audioPlayer.src = audioUrl;
-            showPlayer();
-            setTimeout(() => elements.audioPlayer.play(), 100); 
+        /**
+         * 解析原始 XML item 字符串，生成剧集对象数组
+         * @param {string} xmlString 包含多个 <item>...</item> 的字符串
+         * @returns {Array<object>} 剧集对象数组
+         */
+        function parseXmlItems(xmlString) {
+            // 按 </item> 分割，每个片段都包含一个 <item> 的内容
+            // 这种分割方式保证了无论有多少个 <item> 都能被单独处理
+            const items = xmlString.split('</item>').filter(item => item.trim() !== '');
+            const episodes = [];
+
+            items.forEach(itemXml => {
+                // 确保每个 itemXml 是完整的片段，便于正则匹配
+                const fullItemXml = itemXml + '</item>';
+
+                const title = extractTagContent(fullItemXml, 'title');
+                const pubDate = extractTagContent(fullItemXml, 'pubDate');
+                // 优先使用 itunes:duration，如果不存在则使用 '未知'
+                const duration = extractTagContent(fullItemXml, 'itunes:duration') || '未知'; 
+                // 从 enclosure 标签中提取 url 属性作为 audioUrl
+                const audioUrl = extractAttribute(fullItemXml, 'enclosure', 'url');
+                // 提取 description 标签中的内容 (已在 extractTagContent 中处理 CDATA)
+                const descriptionHtml = extractTagContent(fullItemXml, 'description');
+
+                if (title && audioUrl) {
+                    episodes.push({
+                        title,
+                        audioUrl,
+                        pubDate,
+                        duration,
+                        descriptionHtml
+                    });
+                }
+            });
+
+            return episodes;
         }
 
-        // --- 描述展开/折叠功能 (已修复) ---
-        function toggleDescription(descId, buttonId) {
-            const desc = document.getElementById(descId);
-            const button = document.getElementById(buttonId);
-            
-            // CSS transition duration is 0.5s
-            const transitionDuration = 500; 
-            // Target collapsed height defined in CSS is 4.875em
-            const collapsedHeight = '4.875em';
-            
-            if (desc.classList.contains('description-collapsed')) {
-                // 状态: EXPAND (从折叠到展开)
-                
-                // 1. 移除折叠类和目标高度
-                desc.classList.remove('description-collapsed');
-                desc.classList.add('description-expanded'); // 标记为已展开
-                
-                // 2. 设置 max-height 为实际内容高度，触发平滑展开
-                // 注意：scrollHeight 必须在移除 .description-collapsed 之后获取，但我们这里先移除类，CSS max-height: 4.875em 失效，
-                // 然后设置 scrollHeight，让 transition 从 4.875em 移动到 scrollHeight
-                desc.style.maxHeight = desc.scrollHeight + "px";
-                
-                // 3. 动画完成后清除 inline max-height，允许内容动态重排
-                setTimeout(() => {
-                    // 确保在清除前，用户没有再次点击收起
-                    if (desc.classList.contains('description-expanded')) {
-                         desc.style.maxHeight = '';
-                    }
-                }, transitionDuration + 50); // 略大于过渡时间
+        // 步骤 4: 运行解析并获取剧集数据
+        // episodes 数组的长度 (N) 动态取决于 rawXmlItems 中的 <item> 数量
+        const episodes = parseXmlItems(rawXmlItems);
 
-                button.textContent = '收起内容 (折叠)';
+        // =================================================================
+        // 步骤 5: 页面逻辑
+        // =================================================================
 
-            } else {
-                // 状态: COLLAPSE (从展开到折叠)
+        const episodeListEl = document.getElementById('episodeList');
+        const podcastAudioEl = document.getElementById('podcastAudio');
+        const nowPlayingTitleEl = document.getElementById('nowPlayingTitle');
+        const audioPlayerContainerEl = document.getElementById('audioPlayerContainer');
+        const scrollToTopBtnEl = document.getElementById('scrollToTopBtn');
+        
+        // 播放器自定义控制元素
+        const playPauseButtonEl = document.getElementById('playPauseButton');
+        const playIconEl = document.getElementById('playIcon');
+        const pauseIconEl = document.getElementById('pauseIcon');
+        const progressBarEl = document.getElementById('progressBar');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationTimeEl = document.getElementById('durationTime');
 
-                // 1. 确保当前 max-height 是完整的 scrollHeight，为收缩动画提供起始点
-                // 这一步在展开后可能已经被清除了 (maxHeight = ''), 所以需要重新设置
-                desc.style.maxHeight = desc.scrollHeight + "px"; 
-                
-                // 2. 强制浏览器重绘 (reflow) 以确保步骤 1 生效
-                desc.offsetHeight; 
+        // 全局变量，用于在 [ERROR] 状态下存储正确的剧集标题
+        let currentTrackTitle = "请选择一集开始播放";
 
-                // 3. 立即将 max-height 设置为折叠目标高度，触发收缩过渡
-                desc.style.maxHeight = collapsedHeight; 
-                desc.classList.add('description-collapsed');
-                desc.classList.remove('description-expanded');
-
-                button.textContent = '显示全部 (展开)';
+        /**
+         * 格式化时间戳为本地日期字符串
+         * @param {string} dateString GMT时间字符串
+         * @returns {string} 格式化后的日期
+         */
+        function formatPubDate(dateString) {
+            try {
+                const date = new Date(dateString);
+                // 使用中文地区格式
+                return date.toLocaleDateString('zh-CN', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            } catch (e) {
+                console.error("Date parsing error:", e);
+                return '未知日期';
             }
         }
         
-        // --- 辅助函数 (保持不变) ---
-        function formatDate(dateString) {
-            try {
-                const date = new Date(dateString);
-                const y = date.getFullYear();
-                const m = String(date.getMonth() + 1).padStart(2, '0');
-                const d = String(date.getDate()).padStart(2, '0');
-                return `${y}-${m}-${d}`;
-            } catch (e) {
-                return dateString;
-            }
+        /**
+         * 格式化秒数为 MM:SS 格式
+         * @param {number} seconds 秒数
+         * @returns {string} 格式化后的时间字符串
+         */
+        function formatTime(seconds) {
+            if (isNaN(seconds) || seconds < 0) return '00:00';
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
+            const pad = (num) => String(num).padStart(2, '0');
+            return `${pad(minutes)}:${pad(remainingSeconds)}`;
         }
 
-        function parseXml(xmlString) {
-            try {
-                const parser = new DOMParser();
-                return parser.parseFromString(xmlString, "text/xml");
-            } catch (e) {
-                console.error("XML 解析失败:", e);
-                return null;
-            }
-        }
-
-        // --- 渲染函数 (已修改以支持展开/折叠) ---
+        /**
+         * 渲染单个剧集卡片的 HTML
+         * @param {object} episode 剧集数据对象
+         * @param {number} index 剧集索引
+         * @returns {string} 剧集卡片的 HTML 字符串
+         */
         function renderEpisode(episode, index) {
-            const card = document.createElement('div');
-            card.className = 'bg-white p-6 shadow-lg fade-in border-4 border-black';
-            card.style.animationDelay = `${0.3 + index * 0.1}s`;
+            const formattedDate = formatPubDate(episode.pubDate);
+            const descId = `desc-${index}`;
+            const toggleId = `toggle-${index}`;
+            
+            // descriptionHtml 包含 XML 解析后的 HTML 结构（如 <p> 标签）
+            const descriptionPreview = episode.descriptionHtml; 
 
-            // 提取纯文本描述
-            const fullDescription = episode.description.replace(/<[^>]*>?/gm, ''); 
-            // 检查内容是否足够长，需要折叠（以 150 字符为界限）
-            const needsToggle = fullDescription.length > 150;
-
-            // 初始状态：如果需要折叠，则应用 description-collapsed 类
-            const initialClass = needsToggle ? 'description-collapsed' : 'description-expanded';
-
-            card.innerHTML = `
-                <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between space-y-4 lg:space-y-0">
-                    <div class="flex-1 min-w-0 pr-4">
-                        <h3 class="text-xl font-bold text-black border-b-2 border-dotted border-gray-400 mb-1">${index + 1}. ${episode.title}</h3>
-                        <p class="text-sm text-red-700 font-bold mb-3">日期: ${episode.pubDate}</p>
+            return `
+                <div class="episode-card rounded-xl p-6 transition duration-300 ease-in-out shadow-lg flex flex-col justify-between">
+                    <div>
+                        <!-- 标题：移除 neon-text-green 类，使用普通白色文本 -->
+                        <h4 class="text-xl font-bold text-white mb-2">${episode.title}</h4>
                         
-                        <!-- 描述容器 -->
-                        <div id="desc-${index}" class="text-gray-700 text-sm leading-relaxed ${initialClass}">
-                            ${fullDescription || '数据载入中...'}
+                        <!-- 元数据 -->
+                        <div class="text-xs text-gray-400 font-mono mb-3 space-y-1">
+                            <p>日期: ${formattedDate}</p>
+                            <p>时长: ${episode.duration}</p>
                         </div>
-                        
-                        <!-- 展开/折叠按钮，只在需要折叠时显示 -->
-                        ${needsToggle ? `
-                            <button id="toggle-btn-${index}" 
-                                class="text-red-500 hover:text-black text-sm font-bold mt-2 underline transition-colors duration-150"
-                                onclick="toggleDescription('desc-${index}', 'toggle-btn-${index}')"
-                            >
-                                显示全部 (展开)
-                            </button>` 
-                        : ''}
+
+                        <!-- 描述 (可展开/收起) -->
+                        <div id="${descId}" class="desc-container text-gray-300 text-sm leading-relaxed mb-3">
+                            ${descriptionPreview}
+                        </div>
+                        <button id="${toggleId}" onclick="toggleDescription('${descId}', '${toggleId}')"
+                                class="text-secondary-color hover:text-primary-color text-xs font-bold transition duration-150 mb-4 focus:outline-none">
+                            [查看全部内容]
+                        </button>
                     </div>
-                    <button 
-                        class="game-button play-button text-white flex items-center px-4 py-2 text-sm font-bold whitespace-nowrap"
-                        onclick="playEpisode('${episode.title.replace(/'/g, "\\'")}', '${episode.audioUrl}')"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-2 fill-current" viewBox="0 0 24 24"><path d="M6 3l15 9-15 9V3z"/></svg>
-                        开始任务
+
+                    <!-- 播放按钮：文字颜色改为白色 (text-white) 提高对比度 -->
+                    <button class="play-button bg-primary-color text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center text-sm neon-glow-green"
+                            data-audio-url="${episode.audioUrl}" 
+                            data-title="${episode.title}">
+                        <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path>
+                        </svg>
+                        开始播放
                     </button>
                 </div>
             `;
-            elements.episodesContainer.appendChild(card);
         }
 
-        // --- 主逻辑 (已修复：移除倒序排列) ---
-        async function loadPodcastFeed() {
-            elements.loadingSpinner.classList.remove('hidden');
-            elements.errorMessage.classList.add('hidden');
-            elements.episodesContainer.innerHTML = '';
+        /**
+         * 切换剧集描述的展开/收起状态
+         * @param {string} descId 描述容器的ID
+         * @param {string} toggleId 切换按钮的ID
+         */
+        function toggleDescription(descId, toggleId) {
+            const descEl = document.getElementById(descId);
+            const toggleEl = document.getElementById(toggleId);
+
+            if (descEl.classList.contains('expanded')) {
+                // 收起
+                descEl.classList.remove('expanded');
+                toggleEl.textContent = '[查看全部内容]';
+            } else {
+                // 展开
+                descEl.classList.add('expanded');
+                toggleEl.textContent = '[收起简介]';
+            }
+        }
+
+        /**
+         * 处理剧集点击播放事件
+         * @param {HTMLElement} button 触发事件的播放按钮
+         */
+        function handleEpisodePlay(button) {
+            const audioUrl = button.dataset.audioUrl;
+            const title = button.dataset.title;
+
+            // 1. 更新播放器标题和音频源
+            nowPlayingTitleEl.textContent = title; // 立即设置为正确的标题
+            currentTrackTitle = title; // 存储正确的标题
+            podcastAudioEl.src = audioUrl; // 设置音频 URL
+
+            // 2. 重置播放器状态
+            currentTimeEl.textContent = formatTime(0);
+            durationTimeEl.textContent = formatTime(0); // 重置时长直到 metadata 加载
+            progressBarEl.value = 0;
             
-            let xmlString = HARDCODED_XML.trim();
+            // 确保显示播放器容器
+            audioPlayerContainerEl.classList.remove('hidden');
 
-            if (!xmlString) {
-                // 如果用户没有粘贴 XML，则退回到尝试直接请求 (但预期会因 CORS 失败)
-                console.warn("HARDCODED_XML 变量为空。尝试直接请求 RSS Feed，但预期会因 CORS 策略失败。");
-                try {
-                    const response = await fetch(RSS_FEED_URL);
-                    if (!response.ok) {
-                         // 如果直接请求失败，直接抛出错误
-                        throw new Error(`直接请求失败，状态码: ${response.status}。请确保已粘贴 XML 内容。`);
-                    }
-                    xmlString = await response.text();
-                } catch (error) {
-                    console.error("无法加载播客数据。请将 XML 粘贴到 HARDCODED_XML 变量中。", error);
-                    elements.errorMessage.classList.remove('hidden');
-                    elements.loadingSpinner.classList.add('hidden');
-                    return;
-                }
-            }
-
-            // 使用获取到的 XML 字符串进行解析和渲染
-            try {
-                const xmlDoc = parseXml(xmlString);
+            // 3. 加载新音频并尝试播放
+            podcastAudioEl.load();
+            
+            podcastAudioEl.play().catch(error => {
+                // 捕获自动播放失败，包括 NotSupportedError
+                console.error("Audio play/load failed:", error);
                 
-                if (!xmlDoc || xmlDoc.getElementsByTagName('parsererror').length > 0) {
-                    // 检查 XML 解析错误
-                    throw new Error("XML 解析错误。请检查您粘贴的 XML 内容格式是否正确。");
-                }
-
-                // **注意**：XML 中的根元素是 `<rss>`，我们需要找到 `<channel>`
-                const channel = xmlDoc.querySelector('channel');
-
-                if (!channel) {
-                    throw new Error("XML 结构不完整，未找到 <channel> 标签。");
-                }
-
-
-                // 1. 播客元数据
-                const podcastTitle = channel.querySelector('title')?.textContent || '游戏开始';
-                // 播客源没有 itunes:subtitle 标签，使用 link 标签的标题作为副标题的候选，否则使用默认值
-                const podcastDescriptionRaw = channel.querySelector('description')?.textContent || '数据读取中...';
-                const podcastSubtitle = podcastDescriptionRaw.substring(0, 50) + (podcastDescriptionRaw.length > 50 ? '...' : ''); 
-                const podcastDescription = podcastDescriptionRaw;
-
-                elements.title.textContent = podcastTitle;
-                elements.subtitle.textContent = podcastSubtitle;
-                // 去除描述中的所有 HTML 标签
-                elements.description.innerHTML = podcastDescription.replace(/<[^>]*>?/gm, '');
-
-                // 2. 剧集列表
-                const items = channel.querySelectorAll('item');
-                let episodes = [];
-
-                items.forEach(item => {
-                    const title = item.querySelector('title')?.textContent;
-                    const pubDate = item.querySelector('pubDate')?.textContent;
-                    const enclosure = item.querySelector('enclosure');
-                    const audioUrl = enclosure ? enclosure.getAttribute('url') : null;
-                    
-                    // 优先使用 <content:encoded>，否则使用 <description>
-                    // 由于 <content:encoded> 带有命名空间，我们直接在 item 节点下查找 description
-                    const descriptionElement = item.querySelector('description');
-                    const description = descriptionElement ? descriptionElement.textContent : '';
-
-
-                    if (title && audioUrl) {
-                        episodes.push({
-                            title: title,
-                            pubDate: formatDate(pubDate),
-                            audioUrl: audioUrl,
-                            description: description
-                        });
+                let errorMessageText = " (需手动点击播放键)";
+                if (error.name === 'NotSupportedError') {
+                    // 针对用户反馈的 NotSupportedError 提供更明确的提示
+                    errorMessageText = " (加载失败: 媒体格式或链接不受支持)";
+                    // 打印详细的媒体错误信息到控制台，供高级调试
+                    if (podcastAudioEl.error) {
+                        console.error("HTMLMediaElement Error Code:", podcastAudioEl.error.code);
                     }
+                } else if (error.name === 'NotAllowedError') {
+                    // 捕获浏览器阻止自动播放的情况
+                    errorMessageText = " (需手动点击播放键)";
+                }
+
+                // 显示错误提示
+                nowPlayingTitleEl.textContent = `[ERROR] ${title}${errorMessageText}`;
+                
+                // 自动播放失败，确保显示播放图标
+                playIconEl.classList.remove('hidden');
+                pauseIconEl.classList.add('hidden');
+            });
+        }
+        
+        // =================================================================
+        // 播放器控制事件监听器
+        // =================================================================
+
+        // Play/Pause 切换 (修复 BUG: 确保手动播放时清除 ERROR 提示)
+        playPauseButtonEl.addEventListener('click', () => {
+            if (podcastAudioEl.paused) {
+                // 如果当前标题显示了 ERROR 提示，手动播放时清除它
+                if (nowPlayingTitleEl.textContent.includes('[ERROR]')) {
+                     nowPlayingTitleEl.textContent = currentTrackTitle;
+                }
+                podcastAudioEl.play();
+            } else {
+                podcastAudioEl.pause();
+            }
+        });
+
+        // 监听媒体错误事件，确保当发生 NotSupportedError 时，界面能感知
+        podcastAudioEl.addEventListener('error', function(e) {
+            console.error('媒体加载错误事件触发:', e);
+            
+            // 只有当用户点击播放按钮后，才更新播放器状态，防止初始加载错误
+            if (currentTrackTitle !== "请选择一集开始播放") {
+                 let errorInfo = ' (加载失败: 未知媒体错误)';
+                 if (podcastAudioEl.error && podcastAudioEl.error.code === 4) {
+                    errorInfo = ' (加载失败: 媒体格式或链接不受支持)';
+                 }
+                nowPlayingTitleEl.textContent = `[ERROR] ${currentTrackTitle}${errorInfo}`;
+                playIconEl.classList.remove('hidden');
+                pauseIconEl.classList.add('hidden');
+            }
+        });
+
+        // 更新图标到 Pause
+        podcastAudioEl.addEventListener('play', () => {
+            playIconEl.classList.add('hidden');
+            pauseIconEl.classList.remove('hidden');
+        });
+
+        // 更新图标到 Play
+        podcastAudioEl.addEventListener('pause', () => {
+            playIconEl.classList.remove('hidden');
+            pauseIconEl.classList.add('hidden');
+        });
+        
+        // 元数据加载完成 (设置总时长和进度条最大值)
+        podcastAudioEl.addEventListener('loadedmetadata', () => {
+            const duration = podcastAudioEl.duration;
+            progressBarEl.max = duration;
+            durationTimeEl.textContent = formatTime(duration);
+        });
+
+        // 时间更新 (更新进度条和当前时间显示)
+        podcastAudioEl.addEventListener('timeupdate', () => {
+            const currentTime = podcastAudioEl.currentTime;
+            progressBarEl.value = currentTime;
+            currentTimeEl.textContent = formatTime(currentTime);
+        });
+
+        // 进度条拖动 (跳转播放位置)
+        progressBarEl.addEventListener('input', () => {
+            // 在拖动时，实时更新时间显示
+            currentTimeEl.textContent = formatTime(progressBarEl.value);
+        });
+        
+        // 进度条释放 (跳转播放位置)
+        progressBarEl.addEventListener('change', () => {
+             podcastAudioEl.currentTime = progressBarEl.value;
+        });
+
+        // 播放结束 (重置状态)
+        podcastAudioEl.addEventListener('ended', () => {
+            playIconEl.classList.remove('hidden');
+            pauseIconEl.classList.add('hidden');
+            progressBarEl.value = 0;
+            podcastAudioEl.currentTime = 0; // 确保音频内部播放位置也重置
+            currentTimeEl.textContent = formatTime(0); // 重置当前时间显示
+        });
+        
+        // =================================================================
+        // 顶部导航栏回到顶部功能 
+        // =================================================================
+        scrollToTopBtnEl.addEventListener('click', (event) => {
+            event.preventDefault(); // 阻止默认的锚点跳转行为
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth' // 启用平滑滚动
+            });
+        });
+
+        // 在 window 上暴露函数，供 HTML 内联调用 (如 toggleDescription)
+        window.toggleDescription = toggleDescription;
+
+
+        /**
+         * 初始化页面内容和事件监听器
+         */
+        function initPodcastPage() {
+            // 渲染剧集列表
+            episodeListEl.innerHTML = episodes.map(renderEpisode).join('');
+
+            // 添加播放按钮监听器
+            // 确保选择所有带有 data-audio-url 属性的播放按钮
+            const playButtons = document.querySelectorAll('button[data-audio-url]');
+            playButtons.forEach(button => {
+                button.addEventListener('click', (event) => {
+                    handleEpisodePlay(button);
                 });
-                
-                if (episodes.length === 0) {
-                    elements.episodesContainer.innerHTML = '<p class="text-black text-center py-8 font-bold border-4 border-black bg-white">!! 任务列表为空 (E-00) !!</p>';
-                } else {
-                    // ** FIX: 移除 episodes.reverse() **
-                    // 按照 XML 顺序渲染，通常是按发布时间倒序排列 (最新的在最前，符合用户默认认知)
-                    episodes.forEach((ep, index) => renderEpisode(ep, index));
-                }
-                
-                elements.loadingSpinner.classList.add('hidden');
-
-            } catch (error) {
-                console.error("渲染播客数据失败:", error);
-                elements.errorMessage.classList.remove('hidden');
-                elements.errorMessage.querySelector('span').textContent = `无法处理数据。原因: ${error.message}`;
-                elements.loadingSpinner.classList.add('hidden');
-            }
+            });
+            
+            // 确保播放器容器在初始时是隐藏的
+            audioPlayerContainerEl.classList.add('hidden'); 
         }
 
-        // 页面加载完成后执行
-        window.onload = loadPodcastFeed;
+        // 页面加载完成后执行初始化
+        window.onload = initPodcastPage;
     </script>
 </body>
 </html>
