@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏开始 - 播客官网</title>
+    <!-- 引入 Tailwind CSS CDN --><script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 采用通用且粗犷的字体，并通过CSS模拟像素效果 */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            /* 亮黄色背景 */
+            background-color: #FEE000;
+            color: #000000; /* 纯黑色文本 */
+            
+            /* 明显的像素点背景图案 */
+            background-image: linear-gradient(to right, #FFD700 1px, transparent 1px), 
+                              linear-gradient(to bottom, #FFD700 1px, transparent 1px);
+            background-size: 10px 10px; /* 更细密的像素网格 */
+        }
+
+        /* 移除所有元素的默认圆角，强制像素化风格 */
+        .rounded-xl, .rounded-lg, .rounded-full {
+            border-radius: 0 !important;
+        }
+
+        /* 自定义滚动条样式 - 保持像素风格的方正 */
+        .episode-list::-webkit-scrollbar {
+            width: 10px;
+        }
+        .episode-list::-webkit-scrollbar-thumb {
+            background-color: #333; /* 黑色滚动条 */
+            border-radius: 0;
+        }
+        .episode-list::-webkit-scrollbar-track {
+            background-color: #aaa;
+            border-radius: 0;
+        }
+
+        /* 动画效果 - 保持简单淡入 */
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+            opacity: 0;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 播客标题的像素化特殊效果 */
+        #podcast-title {
+            font-size: 2.5rem; /* 增大字体 */
+            font-weight: 900;
+            /* 经典 8-bit 描边效果：多重阴影模拟厚边框 */
+            text-shadow: 
+                -3px -3px 0 #333,
+                 3px -3px 0 #333,
+                -3px  3px 0 #333,
+                 3px  3px 0 #333,
+                4px 4px 0 #f00; /* 底部和右侧的红色阴影，增加冲击力 */
+            color: #fff; /* 白色内填充 */
+        }
+
+        /* 8-bit 风格的按钮 */
+        .game-button {
+            background-color: #FF0000; /* 红色按钮 */
+            color: #FFFFFF; /* 白色文字 */
+            border: 4px solid #000000; /* 粗黑边框 */
+            box-shadow: 4px 4px 0 0 #333; /* 模拟深色边框的阴影 */
+            transform: translateY(0);
+            transition: all 0.05s linear; /* 线性过渡，更生硬 */
+            padding: 10px 20px;
+            font-weight: 800;
+        }
+        .game-button:hover {
+            background-color: #CC0000; /* 悬停时颜色变暗 */
+            box-shadow: 6px 6px 0 0 #333;
+        }
+        .game-button:active {
+            box-shadow: 0 0 0 0 #333; /* 移除阴影 */
+            transform: translate(4px, 4px); /* 完全下沉 */
+        }
+
+        /* 剧集播放按钮的特殊样式 */
+        .play-button {
+            background-color: #008000; /* 绿色按钮 */
+        }
+        .play-button:hover {
+             background-color: #006400; /* 悬停时绿色变深 */
+        }
+
+        /* --- 静态斜线像素背景样式 --- */
+        .pixel-art-background {
+            position: relative; /* 允许伪元素定位 */
+            overflow: hidden; /* 隐藏超出部分的像素 */
+            background-color: #fff; /* 原有的白色背景 */
+        }
+
+        .pixel-art-background::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* 静态斜线网格图案 (45度) */
+            background-image: repeating-linear-gradient(
+                45deg,
+                #000000 0,
+                #000000 5px,
+                transparent 5px,
+                transparent 10px
+            );
+            background-size: 20px 20px; /* 控制图案重复的大小 */
+            opacity: 0.08; /* 非常低的透明度，提供微妙的纹理 */
+            mix-blend-mode: multiply; 
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="app" class="min-h-screen flex flex-col items-center p-4">
+        <!-- 主容器 --><!-- Header 添加了 pixel-art-background 类 --><header class="w-full bg-white shadow-xl p-6 lg:p-10 mb-8 rounded-none border-4 border-black pixel-art-background">
+            <!-- 内容恢复为图标和文字居中排列 --><div class="max-w-4xl mx-auto flex flex-col lg:flex-row items-center justify-center space-y-4 lg:space-y-0">
+                <div class="flex flex-col items-center justify-center space-y-4">
+                    <!-- 播客图标 - w-32 h-32 固定大小 --><div class="w-32 h-32 bg-gray-900 flex items-center justify-center shadow-lg border-4 border-black overflow-hidden relative z-10">
+                        <!-- 使用用户提供的 URL --><img src="https://image.xyzcdn.net/Fgsz78ncyuMncuAXKjAvOL-IW9wv.png" 
+                             alt="播客封面图" 
+                             class="w-full h-full object-cover p-1"
+                             onerror="this.onerror=null; this.src='https://placehold.co/128x128/333/fff?text=ICON+ERROR'">
+                    </div>
+                    <div class="relative z-10"> <!-- 确保文字在动画上方 --><h1 id="podcast-title" class="text-3xl text-center font-extrabold text-gray-900">游戏开始</h1>
+                        <p id="podcast-subtitle" class="text-base text-center text-black font-bold mt-2 border-b-2 border-black pb-1">按下 START 键</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-4xl w-full px-2 mb-12">
+            <!-- 播客简介 --><section class="bg-white p-6 rounded-none shadow-lg mb-8 fade-in border-4 border-black" style="animation-delay: 0.1s;">
+                <h2 class="text-xl font-bold mb-3 text-black border-b-2 border-red-500 pb-1">:: 游戏剧情简介 (简介)</h2>
+                <div id="podcast-description" class="text-black leading-relaxed text-sm">
+                    <!-- Loading skeleton --><p class="animate-pulse bg-gray-200 h-4 rounded-none w-full mb-2"></p>
+                    <p class="animate-pulse bg-gray-200 h-4 rounded-none w-5/6"></p>
+                </div>
+            </section>
+
+            <!-- 剧集列表 --><section class="fade-in" style="animation-delay: 0.2s;">
+                <h2 class="text-xl font-bold mb-4 text-black border-b-2 border-red-500 pb-1">:: 任务日志 (最新剧集)</h2>
+                
+                <!-- 加载指示器和错误信息 --><div id="loading-spinner" class="flex justify-center items-center py-12 bg-white border-4 border-black shadow-lg">
+                    <svg class="animate-spin -ml-1 mr-3 h-8 w-8 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <rect x="2" y="2" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <rect x="4" y="4" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path class="opacity-75" fill="currentColor" d="M12 4V0C5.373 0 0 5.373 0 12h4zm0 16v4c6.627 0 12-5.373 12-12h-4z"></path>
+                    </svg>
+                    <span class="text-black font-bold">加载中... 请等待数据包。</span>
+                </div>
+
+                <div id="error-message" class="hidden bg-red-800 text-white px-4 py-3 border-4 border-black relative" role="alert">
+                    <strong class="font-bold">!! 错误 (E-99) !!</strong>
+                    <span class="block sm:inline">无法连接到服务器。请检查您的网络设置。</span>
+                </div>
+
+                <!-- 剧集列表容器 --><div id="episodes-container" class="space-y-4 episode-list">
+                    <!-- 剧集卡片将由 JavaScript 填充 --></div>
+            </section>
+        </main>
+
+        <!-- 浮动播放器 --><div id="audio-player-container" class="fixed bottom-0 left-0 right-0 p-4 bg-gray-900 text-white shadow-2xl transform translate-y-full transition-transform duration-300 ease-in-out z-50 rounded-none border-t-4 border-red-500" style="opacity: 0;">
+            <div class="max-w-4xl mx-auto flex items-center justify-between">
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold truncate" id="player-episode-title">未选择任务 (剧集)</p>
+                    <audio id="audio-player" controls class="w-full mt-2 bg-transparent"></audio>
+                </div>
+                <button onclick="hidePlayer()" class="ml-4 text-gray-400 hover:text-red-500 transition duration-150">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const RSS_FEED_URL = 'https://feed.xyzfm.space/n9bfbdmbbqam';
+        const CORS_PROXY = 'https://corsproxy.io/?'; 
+        
+        const elements = {
+            title: document.getElementById('podcast-title'),
+            subtitle: document.getElementById('podcast-subtitle'),
+            description: document.getElementById('podcast-description'),
+            episodesContainer: document.getElementById('episodes-container'),
+            loadingSpinner: document.getElementById('loading-spinner'),
+            errorMessage: document.getElementById('error-message'),
+            audioPlayerContainer: document.getElementById('audio-player-container'),
+            audioPlayer: document.getElementById('audio-player'),
+            playerTitle: document.getElementById('player-episode-title')
+        };
+
+        // --- 播放器控制 ---
+        function showPlayer() {
+            elements.audioPlayerContainer.style.transform = 'translateY(0)';
+            elements.audioPlayerContainer.style.opacity = '1';
+        }
+
+        function hidePlayer() {
+            elements.audioPlayerContainer.style.transform = 'translateY(100%)';
+            elements.audioPlayerContainer.style.opacity = '0';
+            elements.audioPlayer.pause();
+            elements.audioPlayer.src = '';
+            elements.playerTitle.textContent = '未选择任务 (剧集)';
+        }
+
+        function playEpisode(title, audioUrl) {
+            elements.playerTitle.textContent = title;
+            elements.audioPlayer.src = audioUrl;
+            showPlayer();
+            // 在 src 设置后稍作延迟播放，确保资源加载
+            setTimeout(() => elements.audioPlayer.play(), 100); 
+        }
+
+        // --- 辅助函数 ---
+
+        /**
+         * 格式化日期字符串
+         */
+        function formatDate(dateString) {
+            try {
+                const date = new Date(dateString);
+                // 像素风格的日期格式 (YYYY-MM-DD)
+                const y = date.getFullYear();
+                const m = String(date.getMonth() + 1).padStart(2, '0');
+                const d = String(date.getDate()).padStart(2, '0');
+                return `${y}-${m}-${d}`;
+            } catch (e) {
+                return dateString;
+            }
+        }
+
+        /**
+         * 解析 XML 字符串并返回 DOM 对象
+         */
+        function parseXml(xmlString) {
+            try {
+                const parser = new DOMParser();
+                return parser.parseFromString(xmlString, "text/xml");
+            } catch (e) {
+                console.error("XML 解析失败:", e);
+                return null;
+            }
+        }
+
+        // --- 渲染函数 ---
+
+        /**
+         * 渲染单个剧集卡片
+         */
+        function renderEpisode(episode, index) {
+            const card = document.createElement('div');
+            // 像素风格：直角，粗边框，黑底白字
+            card.className = 'bg-white p-6 shadow-lg fade-in border-4 border-black';
+            card.style.animationDelay = `${0.3 + index * 0.1}s`;
+
+            // HTML 实体转义（如果描述中有 HTML 标签或实体，需要处理）
+            const cleanDescription = episode.description
+                .replace(/<[^>]*>?/gm, '') // 移除 HTML 标签
+                .substring(0, 200) + (episode.description.length > 200 ? '...' : '');
+
+            card.innerHTML = `
+                <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between space-y-4 lg:space-y-0">
+                    <div class="flex-1 min-w-0 pr-4">
+                        <h3 class="text-xl font-bold text-black border-b-2 border-dotted border-gray-400 mb-1">${index + 1}. ${episode.title}</h3>
+                        <p class="text-sm text-red-700 font-bold mb-3">日期: ${episode.pubDate}</p>
+                        <p class="text-gray-700 text-sm line-clamp-2">${cleanDescription || '数据载入中...'}</p>
+                    </div>
+                    <!-- 播放按钮使用 game-button 和 play-button 样式 --><button 
+                        class="game-button play-button text-white flex items-center px-4 py-2 text-sm font-bold whitespace-nowrap"
+                        onclick="playEpisode('${episode.title.replace(/'/g, "\\'")}', '${episode.audioUrl}')"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline mr-2 fill-current" viewBox="0 0 24 24"><path d="M6 3l15 9-15 9V3z"/></svg>
+                        开始任务
+                    </button>
+                </div>
+            `;
+            elements.episodesContainer.appendChild(card);
+        }
+
+        // --- 主逻辑 ---
+        async function loadPodcastFeed() {
+            elements.loadingSpinner.classList.remove('hidden');
+            elements.errorMessage.classList.add('hidden');
+            elements.episodesContainer.innerHTML = '';
+            
+            const MAX_RETRIES = 3;
+            let delay = 1000; 
+
+            for (let i = 0; i < MAX_RETRIES; i++) {
+                try {
+                    const encodedFeedUrl = encodeURIComponent(RSS_FEED_URL);
+                    const proxyUrl = CORS_PROXY + encodedFeedUrl;
+                    
+                    const response = await fetch(proxyUrl);
+
+                    if (!response.ok) {
+                        throw new Error(`网络请求失败，状态码: ${response.status}`);
+                    }
+
+                    const xmlString = await response.text(); 
+                    const xmlDoc = parseXml(xmlString);
+                    
+                    if (!xmlDoc || xmlDoc.getElementsByTagName('parsererror').length > 0) {
+                        throw new Error("XML 解析错误。");
+                    }
+
+                    const channel = xmlDoc.querySelector('channel');
+
+                    // 1. 播客元数据
+                    const podcastTitle = channel.querySelector('title')?.textContent || '游戏开始';
+                    const podcastSubtitle = channel.querySelector('itunes\\:subtitle, subtitle')?.textContent || '按下 START 键';
+                    const podcastDescription = channel.querySelector('description')?.textContent || '数据读取中...';
+
+                    elements.title.textContent = podcastTitle;
+                    elements.subtitle.textContent = podcastSubtitle;
+                    elements.description.innerHTML = podcastDescription.replace(/<[^>]*>?/gm, '');
+
+                    // 2. 剧集列表
+                    const items = channel.querySelectorAll('item');
+                    let episodes = [];
+
+                    items.forEach(item => {
+                        const title = item.querySelector('title')?.textContent;
+                        const pubDate = item.querySelector('pubDate')?.textContent;
+                        const enclosure = item.querySelector('enclosure');
+                        const audioUrl = enclosure ? enclosure.getAttribute('url') : null;
+                        const description = item.querySelector('description')?.textContent || item.querySelector('itunes\\:summary, summary')?.textContent;
+                        
+                        if (title && audioUrl) {
+                            episodes.push({
+                                title: title,
+                                pubDate: formatDate(pubDate),
+                                audioUrl: audioUrl,
+                                description: description
+                            });
+                        }
+                    });
+                    
+                    if (episodes.length === 0) {
+                        elements.episodesContainer.innerHTML = '<p class="text-black text-center py-8 font-bold border-4 border-black bg-white">!! 任务列表为空 (E-00) !!</p>';
+                    } else {
+                        episodes.forEach((ep, index) => renderEpisode(ep, index));
+                    }
+                    
+                    elements.loadingSpinner.classList.add('hidden');
+                    return; 
+
+                } catch (error) {
+                    console.error(`尝试加载失败 (重试 ${i + 1}/${MAX_RETRIES})`, error);
+                    if (i === MAX_RETRIES - 1) {
+                        elements.errorMessage.classList.remove('hidden');
+                        elements.episodesContainer.innerHTML = '';
+                        elements.loadingSpinner.classList.add('hidden');
+                        return; 
+                    }
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2; 
+                }
+            } 
+        }
+
+        // 页面加载完成后执行
+        window.onload = loadPodcastFeed;
+    </script>
+</body>
+</html>
